@@ -1,7 +1,8 @@
-package com.altruist.account
+package com.altruist.repository
 
-import com.altruist.config.DbConfig
-import com.altruist.config.RepoConfig
+import com.altruist.config.DatabaseConfiguration
+import com.altruist.config.RepositoryConfiguration
+import com.altruist.model.Account
 import groovy.sql.Sql
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest
@@ -19,12 +20,12 @@ import spock.lang.Stepwise
 @ActiveProfiles("test")
 @DataJdbcTest(includeFilters = [@ComponentScan.Filter(type = FilterType.ANNOTATION, value = [Repository])])
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(value = [DbConfig, RepoConfig])
+@Import(value = [DatabaseConfiguration, RepositoryConfiguration])
 @Stepwise
 @Rollback(false)
-class AccountRepoTest extends Specification {
+class AccountRepositoryTest extends Specification {
     @Autowired
-    AccountRepo repo
+    AccountRepository repo
 
     @Autowired
     Sql sql

@@ -1,4 +1,4 @@
-package com.altruist.account;
+package com.altruist.resources;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -8,6 +8,9 @@ import java.net.URISyntaxException;
 import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+
+import com.altruist.model.AccountDto;
+import com.altruist.service.AccountService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,11 +23,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/accounts")
 @Slf4j
-public class AccountCtrl {
+public class AccountController {
 
-  private final AccountSrv accountSrv;
+  private final AccountService accountSrv;
 
-  public AccountCtrl(AccountSrv accountSrv) {
+  public AccountController(AccountService accountSrv) {
     this.accountSrv = accountSrv;
   }
 

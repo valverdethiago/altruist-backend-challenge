@@ -1,18 +1,16 @@
-package com.altruist.account;
+package com.altruist.model;
 
-import java.util.UUID;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-public class Account {
-
-  public UUID account_uuid;
-  public UUID address_uuid;
+@NoArgsConstructor
+public class AccountDto {
   public String username;
   public String email;
   public String name;
   public String street;
   public String city;
   public String state;
-  public Integer zipcode;
+  public String zipcode;
 }

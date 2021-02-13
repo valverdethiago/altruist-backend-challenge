@@ -1,11 +1,15 @@
-package com.altruist.account
+package com.altruist.service
 
+import com.altruist.model.Account
+import com.altruist.model.AccountDto
+import com.altruist.repository.AccountRepository
+import com.altruist.service.AccountService
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class AccountSrvTest extends Specification {
-    AccountRepo mockAccountRepo = Mock()
-    AccountSrv srv = new AccountSrv(mockAccountRepo)
+class AccountServiceTest extends Specification {
+    AccountRepository mockAccountRepo = Mock()
+    AccountService srv = new AccountService(mockAccountRepo)
 
     @Unroll
     def "Should validate for missing account field #field"() {

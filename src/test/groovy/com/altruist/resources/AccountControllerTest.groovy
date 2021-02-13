@@ -1,5 +1,8 @@
-package com.altruist.account
+package com.altruist.resources
 
+import com.altruist.model.AccountDto
+import com.altruist.resources.AccountController
+import com.altruist.service.AccountService
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -15,8 +18,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 
-@WebMvcTest(controllers = [AccountCtrl])
-class AccountCtrlTest extends Specification {
+@WebMvcTest(controllers = [AccountController])
+class AccountControllerTest extends Specification {
     @Autowired
     MockMvc mvc
 
@@ -24,7 +27,7 @@ class AccountCtrlTest extends Specification {
     ObjectMapper objectMapper
 
     @Autowired
-    AccountSrv mockAccountSrv
+    AccountService mockAccountSrv
 
     def "Should accept account requests"() {
         given: "an account request"
@@ -63,8 +66,8 @@ class AccountCtrlTest extends Specification {
         DetachedMockFactory factory = new DetachedMockFactory()
 
         @Bean
-        AccountSrv accountSrv() {
-            factory.Mock(AccountSrv)
+        AccountService accountService() {
+            factory.Mock(AccountService)
         }
     }
 }

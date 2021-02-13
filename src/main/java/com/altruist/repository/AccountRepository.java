@@ -1,8 +1,10 @@
-package com.altruist.account;
+package com.altruist.repository;
 
 import java.sql.Types;
 import java.util.Map;
 import java.util.UUID;
+
+import com.altruist.model.Account;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
@@ -12,11 +14,11 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @Slf4j
-public class AccountRepo {
+public class AccountRepository {
 
   private final NamedParameterJdbcOperations jdbcOperations;
 
-  public AccountRepo(NamedParameterJdbcOperations jdbcOperations) {
+  public AccountRepository(NamedParameterJdbcOperations jdbcOperations) {
     this.jdbcOperations = jdbcOperations;
   }
 

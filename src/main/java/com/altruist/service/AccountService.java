@@ -1,15 +1,19 @@
-package com.altruist.account;
+package com.altruist.service;
 
 import java.util.Objects;
 import java.util.UUID;
+
+import com.altruist.repository.AccountRepository;
+import com.altruist.model.Account;
+import com.altruist.model.AccountDto;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AccountSrv {
-  private final AccountRepo accountRepo;
+public class AccountService {
+  private final AccountRepository accountRepository;
 
-  public AccountSrv(AccountRepo accountRepo) {
-    this.accountRepo = accountRepo;
+  public AccountService(AccountRepository accountRepository) {
+    this.accountRepository = accountRepository;
   }
 
   public UUID createAccount(AccountDto accountDto) {
@@ -35,10 +39,10 @@ public class AccountSrv {
       Objects.requireNonNull(accountDto.city);
       Objects.requireNonNull(accountDto.state);
       Objects.requireNonNull(accountDto.zipcode);
-      account = accountRepo.saveAddress(account);
+      account = accountRepository.saveAddress(account);
     }
 
-    return accountRepo.save(account)
+    return accountRepository.save(account)
         .account_uuid;
   }
 }

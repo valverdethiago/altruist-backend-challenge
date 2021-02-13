@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class DbConfig implements FlywayConfigurationCustomizer {
+public class DatabaseConfiguration implements FlywayConfigurationCustomizer {
 
   @Value("${embedded-db.port}")
   int port;
