@@ -23,7 +23,7 @@ public class AccountService {
   @Validated
   public UUID create(@Valid Account account) {
     if (account.getAddress() != null) {
-      account.setAddressUuid(addressService.create(account.getAddress()).getUuid());
+      account.setAddressUuid(addressService.create(account.getAddress()));
     }
     return accountRepository.save(account).getUuid();
   }

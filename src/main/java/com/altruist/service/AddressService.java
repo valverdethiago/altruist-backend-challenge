@@ -17,7 +17,7 @@ public class AddressService {
   }
 
   @Validated
-  public Address create(@Valid Address address) {
-    return addressRepository.save(address);
+  public UUID create(@Valid Address address) {
+    return addressRepository.save(address).getUuid();
   }
 }

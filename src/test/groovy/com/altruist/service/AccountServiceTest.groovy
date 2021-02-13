@@ -106,18 +106,7 @@ class AccountServiceTest extends Specification {
         service.create(account)
 
         then: "the address is saved"
-        1 * mockAddressService.create(_) >> { Address arg ->
-            with(arg){
-                name == account.address.name
-                street == account.address.street
-                city == account.address.city
-                state == account.address.state
-                zipcode == account.address.zipcode
-            }
-
-            arg.uuid = expectedAddressId
-            arg
-        }
+        1 * mockAddressService.create(account.address) >> expectedAddressId
 
         and: "the account is saved"
         1 * mockAccountRepository.save(_) >> { Account arg ->
