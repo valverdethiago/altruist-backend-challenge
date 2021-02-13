@@ -1,5 +1,6 @@
 package com.altruist.resources
 
+import com.altruist.config.ApplicationConfiguration
 import com.altruist.model.Account
 import com.altruist.model.Address
 import com.altruist.service.AccountService
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Import
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.ResultActions
 import spock.lang.Specification
@@ -19,6 +21,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 
 @WebMvcTest(controllers = [AccountController])
+@Import(value=[ApplicationConfiguration])
 class AccountControllerTest extends Specification {
     @Autowired
     MockMvc mvc
@@ -29,7 +32,7 @@ class AccountControllerTest extends Specification {
     @Autowired
     AccountService mockAccountService
 
-    def "Should accept account requests"() {
+    def "Should accept complete account requests"() {
         given: "an account request"
         Account req = new Account(
                 username: "username123",
@@ -61,6 +64,76 @@ class AccountControllerTest extends Specification {
         results.andExpect(header().exists("Location"))
                 .andExpect(header().string("Location", containsString("/accounts/$expectedId")))
         results.andExpect(content().json("""{"id":"$expectedId"}"""))
+    }
+
+
+    def "Should accept account without address"() {
+        given: "an account request"
+        Account req = new Account(
+                username: "username123",
+                email: "email@example.com"
+        )
+        UUID expectedId = UUID.randomUUID()
+
+        when: "the request is submitted"
+        ResultActions results = mvc.perform(post("/accounts")
+                .accept(APPLICATION_JSON)
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req))
+        )
+
+        then: "the request is processed"
+        1 * mockAccountService.create(req) >> expectedId
+
+        and: "a Created response is returned"
+        results.andExpect(status().isCreated())
+
+        and: "the account ID is returned"
+        results.andExpect(header().exists("Location"))
+                .andExpect(header().string("Location", containsString("/accounts/$expectedId")))
+        results.andExpect(content().json("""{"id":"$expectedId"}"""))
+    }
+
+    def "Should not accept account with address without zipcode"() {
+        given: "an account request"
+        Account req = new Account(
+                username: "username123",
+                email: "email@example.com",
+                address: new Address(
+                        name: "Some Name",
+                        street: "Some street",
+                        city: "Some city",
+                        state: "CA"
+                )
+        )
+
+        when: "the request is submitted"
+        ResultActions results = mvc.perform(post("/accounts")
+                .accept(APPLICATION_JSON)
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req))
+        )
+
+        then: "a BadRequest response is returned"
+        results.andExpect(status().isBadRequest())
+    }
+
+
+    def "Should not accept account without username"() {
+        given: "an account request"
+        Account req = new Account(
+                email: "email@example.com"
+        )
+
+        when: "the request is submitted"
+        ResultActions results = mvc.perform(post("/accounts")
+                .accept(APPLICATION_JSON)
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req))
+        )
+
+        then: "a BadRequest response is returned"
+        results.andExpect(status().isBadRequest())
     }
 
     @TestConfiguration
