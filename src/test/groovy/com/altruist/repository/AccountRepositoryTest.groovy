@@ -4,6 +4,7 @@ import com.altruist.config.DatabaseConfiguration
 import com.altruist.config.RepositoryConfiguration
 import com.altruist.model.Account
 import groovy.sql.Sql
+import org.junit.Before
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
@@ -22,7 +23,7 @@ import spock.lang.Stepwise
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import(value = [DatabaseConfiguration, RepositoryConfiguration])
 @Stepwise
-@Rollback(false)
+@Rollback(true)
 class AccountRepositoryTest extends Specification {
     @Autowired
     AccountRepository repo
@@ -33,8 +34,8 @@ class AccountRepositoryTest extends Specification {
     @Shared
     Account account
 
-    def "Inserts an address"() {
-        given: "an address"
+    @Before
+    def "Initializes the account"() {
         account = new Account(
                 name: "Some Name",
                 street: "Some street",
@@ -42,6 +43,10 @@ class AccountRepositoryTest extends Specification {
                 state: "CA",
                 zipcode: 99999
         )
+    }
+
+    def "Inserts an address"() {
+        given: "an address"
 
         when:
         repo.saveAddress(account)
