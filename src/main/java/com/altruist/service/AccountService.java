@@ -7,6 +7,9 @@ import com.altruist.repository.AccountRepository;
 import com.altruist.model.Account;
 import com.altruist.model.AccountDto;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
+
+import javax.validation.Valid;
 
 @Component
 public class AccountService {
@@ -16,9 +19,8 @@ public class AccountService {
     this.accountRepository = accountRepository;
   }
 
-  public UUID createAccount(AccountDto accountDto) {
-    Objects.requireNonNull(accountDto.username);
-    Objects.requireNonNull(accountDto.email);
+  @Validated
+  public UUID createAccount(@Valid AccountDto accountDto) {
     Account account = new Account();
     account.username = accountDto.username;
     account.email = accountDto.email;
@@ -26,7 +28,7 @@ public class AccountService {
     account.street = accountDto.street;
     account.city = accountDto.city;
     account.state = accountDto.state;
-    account.zipcode = Integer.parseInt(accountDto.zipcode);
+    account.zipcode = accountDto.zipcode;
 
     if (null != accountDto.name ||
         null != accountDto.street ||

@@ -4,12 +4,21 @@ import com.altruist.model.Account
 import com.altruist.model.AccountDto
 import com.altruist.repository.AccountRepository
 import com.altruist.service.AccountService
+import org.spockframework.spring.SpringBean
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.context.annotation.Bean
+import org.springframework.test.context.ContextConfiguration
 import spock.lang.Specification
 import spock.lang.Unroll
+import spock.mock.DetachedMockFactory
 
+@ContextConfiguration(classes = [TestConfig])
 class AccountServiceTest extends Specification {
-    AccountRepository mockAccountRepo = Mock()
-    AccountService srv = new AccountService(mockAccountRepo)
+    @Autowired
+    AccountRepository mockAccountRepo
+    @Autowired
+    AccountService srv
 
     @Unroll
     def "Should validate for missing account field #field"() {
@@ -112,6 +121,22 @@ class AccountServiceTest extends Specification {
 
             arg.account_uuid = expectedAccountId
             arg
+        }
+    }
+
+
+    @TestConfiguration
+    static class TestConfig {
+        DetachedMockFactory factory = new DetachedMockFactory()
+
+        @Bean
+        AccountRepository accountRepository() {
+            factory.Mock(AccountRepository)
+        }
+
+        @Bean
+        AccountService accountService(AccountRepository accountRepository) {
+            return new AccountService(accountRepository);
         }
     }
 }
