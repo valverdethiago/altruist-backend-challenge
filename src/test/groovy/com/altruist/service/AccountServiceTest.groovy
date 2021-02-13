@@ -1,10 +1,10 @@
 package com.altruist.service
 
 import com.altruist.model.Account
-import com.altruist.model.AccountDto
+import com.altruist.model.Address
+import com.altruist.model.State
 import com.altruist.repository.AccountRepository
-import com.altruist.service.AccountService
-import org.spockframework.spring.SpringBean
+import com.altruist.repository.AddressRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -16,21 +16,23 @@ import spock.mock.DetachedMockFactory
 @ContextConfiguration(classes = [TestConfig])
 class AccountServiceTest extends Specification {
     @Autowired
-    AccountRepository mockAccountRepo
+    AccountRepository mockAccountRepository
     @Autowired
-    AccountService srv
+    AddressService mockAddressService
+    @Autowired
+    AccountService service
 
     @Unroll
     def "Should validate for missing account field #field"() {
         given: "an account missing fields"
-        AccountDto account = new AccountDto(
+        Account account = new Account(
                 username: "username123",
                 email: "email@example.com",
         )
         account[field] = null
 
         when:
-        srv.createAccount(account)
+        service.create(account)
 
         then:
         thrown(NullPointerException)
@@ -41,19 +43,21 @@ class AccountServiceTest extends Specification {
 
     def "Should validate for missing address field #field"() {
         given: "an address missing fields"
-        AccountDto account = new AccountDto(
+        Account account = new Account(
                 username: "username123",
                 email: "email@example.com",
-                name: "Some Name",
-                street: "Some street",
-                city: "Some city",
-                state: "CA",
-                zipcode: 99999
+                address: new Address(
+                    name: "Some Name",
+                    street: "Some street",
+                    city: "Some city",
+                    state: State.CA,
+                    zipcode: 99999
+                )
         )
-        account[field] = null
+        account.address[field] = null
 
         when:
-        srv.createAccount(account)
+        service.create(account)
 
         then:
         thrown(NullPointerException)
@@ -64,62 +68,66 @@ class AccountServiceTest extends Specification {
 
     def "Should validate for missing address field zipcode"() {
         given: "an address missing zipcode"
-        AccountDto account = new AccountDto(
+        Account account = new Account(
                 username: "username123",
                 email: "email@example.com",
-                name: "Some Name",
-                street: "Some street",
-                city: "Some city",
-                state: "CA"
+                address: new Address(
+                    name: "Some Name",
+                    street: "Some street",
+                    city: "Some city",
+                    state: State.CA
+                )
         )
 
         when:
-        srv.createAccount(account)
+        service.create(account)
 
         then:
-        thrown(NumberFormatException)
+        thrown(NullPointerException)
     }
 
     def "Should save account and address"() {
         given: "an account"
-        AccountDto account = new AccountDto(
+        Account account = new Account(
                 username: "username123",
                 email: "email@example.com",
-                name: "Some Name",
-                street: "Some street",
-                city: "Some city",
-                state: "CA",
-                zipcode: 99999
+                address : new Address(
+                    name: "Some Name",
+                    street: "Some street",
+                    city: "Some city",
+                    state: State.CA,
+                    zipcode: 99999
+                )
         )
         UUID expectedAddressId = UUID.randomUUID()
         UUID expectedAccountId = UUID.randomUUID()
 
         when:
-        srv.createAccount(account)
+        service.create(account)
 
         then: "the address is saved"
-        1 * mockAccountRepo.saveAddress(_) >> { Account arg ->
+        1 * mockAddressService.create(_) >> { Address arg ->
             with(arg){
-                name == account.name
-                street == account.street
-                city == account.city
-                state == account.state
-                zipcode == account.zipcode as Integer
+                name == account.address.name
+                street == account.address.street
+                city == account.address.city
+                state == account.address.state
+                zipcode == account.address.zipcode
             }
 
-            arg.address_uuid = expectedAddressId
+            arg.uuid = expectedAddressId
             arg
         }
 
         and: "the account is saved"
-        1 * mockAccountRepo.save(_) >> { Account arg ->
+        1 * mockAccountRepository.save(_) >> { Account arg ->
             with(arg){
                 username == account.username
                 email == account.email
-                address_uuid == expectedAddressId
+                addressUuid == expectedAddressId
             }
 
-            arg.account_uuid = expectedAccountId
+            arg.uuid = expectedAccountId
             arg
         }
     }
@@ -135,8 +143,13 @@ class AccountServiceTest extends Specification {
         }
 
         @Bean
-        AccountService accountService(AccountRepository accountRepository) {
-            return new AccountService(accountRepository);
+        AddressService addressService() {
+            factory.Mock(AddressService)
+        }
+
+        @Bean
+        AccountService accountService(AccountRepository accountRepository, AddressService addressService) {
+            return new AccountService(accountRepository, addressService);
         }
     }
 }

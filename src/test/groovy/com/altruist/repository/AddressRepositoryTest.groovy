@@ -2,8 +2,7 @@ package com.altruist.repository
 
 import com.altruist.config.DatabaseConfiguration
 import com.altruist.config.RepositoryConfiguration
-import com.altruist.model.Account
-import groovy.sql.Sql
+import com.altruist.model.Address
 import org.junit.Before
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest
@@ -24,21 +23,32 @@ import spock.lang.Stepwise
 @Import(value = [DatabaseConfiguration, RepositoryConfiguration])
 @Stepwise
 @Rollback(true)
-class AccountRepositoryTest extends Specification {
+class AddressRepositoryTest extends Specification {
     @Autowired
-    AccountRepository repo
+    AddressRepository repository
 
-    def "Inserts an account"() {
-        given: "an account"
-        Account account = new Account(
-            username: "username123",
-            email: "email@example.com"
+    @Shared
+    Address address
+
+    @Before
+    def "Initializes the address"() {
+        address = new Address(
+                name : "Some name",
+                street: "Some street",
+                city: "Some city",
+                state: "CA",
+                zipcode: 99999
         )
+    }
+
+    def "Inserts an address"() {
+        given: "an address"
 
         when:
-        repo.save(account)
+        repository.save(address)
 
-        then: "the account id is returned"
-        account.uuid
+        then: "the address id is returned"
+        address.uuid
     }
+
 }
