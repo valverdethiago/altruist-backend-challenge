@@ -36,6 +36,12 @@ spring:
 http:
   timeout-seconds: 60
 
+# Test database settings
+test-db:
+  name: db
+  schema: trade
+  port: 5436
+
 # Logging settings
 logging.level.: INFO
 logging.level.com.altruist: INFO

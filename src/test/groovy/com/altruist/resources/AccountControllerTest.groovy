@@ -1,5 +1,8 @@
-package com.altruist.account
+package com.altruist.resources
 
+import com.altruist.model.Account
+import com.altruist.model.Address
+import com.altruist.service.AccountService
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -15,8 +18,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 
-@WebMvcTest(controllers = [AccountCtrl])
-class AccountCtrlTest extends Specification {
+@WebMvcTest(controllers = [AccountController])
+class AccountControllerTest extends Specification {
     @Autowired
     MockMvc mvc
 
@@ -24,18 +27,20 @@ class AccountCtrlTest extends Specification {
     ObjectMapper objectMapper
 
     @Autowired
-    AccountSrv mockAccountSrv
+    AccountService mockAccountService
 
     def "Should accept account requests"() {
         given: "an account request"
-        AccountDto req = new AccountDto(
+        Account req = new Account(
                 username: "username123",
                 email: "email@example.com",
-                name: "Some Name",
-                street: "Some street",
-                city: "Some city",
-                state: "CA",
-                zipcode: 99999
+                address: new Address(
+                    name: "Some Name",
+                    street: "Some street",
+                    city: "Some city",
+                    state: "CA",
+                    zipcode: 99999
+                )
         )
         UUID expectedId = UUID.randomUUID()
 
@@ -47,7 +52,7 @@ class AccountCtrlTest extends Specification {
         )
 
         then: "the request is processed"
-        1 * mockAccountSrv.createAccount(req) >> expectedId
+        1 * mockAccountService.create(req) >> expectedId
 
         and: "a Created response is returned"
         results.andExpect(status().isCreated())
@@ -63,8 +68,8 @@ class AccountCtrlTest extends Specification {
         DetachedMockFactory factory = new DetachedMockFactory()
 
         @Bean
-        AccountSrv accountSrv() {
-            factory.Mock(AccountSrv)
+        AccountService accountService() {
+            factory.Mock(AccountService)
         }
     }
 }

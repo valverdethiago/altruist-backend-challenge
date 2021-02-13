@@ -1,8 +1,9 @@
-package com.altruist.account
+package com.altruist.repository
 
-import com.altruist.config.DbConfig
-import com.altruist.config.RepoConfig
-import groovy.sql.Sql
+import com.altruist.config.DatabaseConfiguration
+import com.altruist.config.RepositoryConfiguration
+import com.altruist.model.Address
+import org.junit.Before
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
@@ -19,45 +20,35 @@ import spock.lang.Stepwise
 @ActiveProfiles("test")
 @DataJdbcTest(includeFilters = [@ComponentScan.Filter(type = FilterType.ANNOTATION, value = [Repository])])
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(value = [DbConfig, RepoConfig])
+@Import(value = [DatabaseConfiguration, RepositoryConfiguration])
 @Stepwise
-@Rollback(false)
-class AccountRepoTest extends Specification {
+@Rollback(true)
+class AddressRepositoryTest extends Specification {
     @Autowired
-    AccountRepo repo
-
-    @Autowired
-    Sql sql
+    AddressRepository repository
 
     @Shared
-    Account account
+    Address address
 
-    def "Inserts an address"() {
-        given: "an address"
-        account = new Account(
-                name: "Some Name",
+    @Before
+    def "Initializes the address"() {
+        address = new Address(
+                name : "Some name",
                 street: "Some street",
                 city: "Some city",
                 state: "CA",
                 zipcode: 99999
         )
+    }
+
+    def "Inserts an address"() {
+        given: "an address"
 
         when:
-        repo.saveAddress(account)
+        repository.save(address)
 
         then: "the address id is returned"
-        account.address_uuid
+        address.uuid
     }
 
-    def "Inserts an account"() {
-        given: "an account"
-        account.username = "username123"
-        account.email = "email@example.com"
-
-        when:
-        repo.save(account)
-
-        then: "the account id is returned"
-        account.account_uuid
-    }
 }
