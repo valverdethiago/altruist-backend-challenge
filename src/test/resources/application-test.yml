@@ -1,7 +1,5 @@
 # Customize DB Port to avoid colision with dev one
 embedded-db:
-  name: db
-  schema: trade
   port: 5436
 # Core spring settings
 spring:
