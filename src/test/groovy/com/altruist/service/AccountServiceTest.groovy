@@ -21,25 +21,6 @@ class AccountServiceTest extends Specification {
     @Autowired
     AccountService service
 
-    @Unroll
-    def "Should validate for missing account field #field"() {
-        given: "an account missing fields"
-        Account account = new Account(
-                username: "username123",
-                email: "email@example.com",
-        )
-        account[field] = null
-
-        when:
-        service.create(account)
-
-        then:
-        thrown(NullPointerException)
-
-        where:
-        field << ["username", "email"]
-    }
-
     def "Should save account and address"() {
         given: "an account"
         Account account = new Account(
