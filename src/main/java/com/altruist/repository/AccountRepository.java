@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.*;
 
 @Repository
@@ -47,6 +48,23 @@ public class AccountRepository {
       throw new RuntimeException("Insert failed for account");
     }
     return account;
+  }
+
+  public void update(Account account) {
+    BeanPropertySqlParameterSource params = new BeanPropertySqlParameterSource(account);
+    log.info("Updating account [{}].", account);
+    String sql = "UPDATE trade.account SET " +
+        "  username = :username, " +
+        "  email = :email " +
+        " WHERE account_uuid = :uuid ";
+    try {
+      jdbcOperations.update(sql, params);
+    }
+    catch (Exception ex) {
+      ex.printStackTrace();
+      log.warn("Update of account record failed. {}", account);
+      throw new RuntimeException("Update failed for account", ex);
+    }
   }
 
   public Account findById(UUID accountUuId) {

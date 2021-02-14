@@ -1,9 +1,13 @@
 package com.altruist.service
 
+import com.altruist.exceptions.InvalidOperationException
 import com.altruist.model.Account
 import com.altruist.model.Address
 import com.altruist.model.State
+import com.altruist.model.Trade
+import com.altruist.model.TradeStatus
 import com.altruist.repository.AccountRepository
+import com.altruist.repository.AddressRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -17,7 +21,7 @@ class AccountServiceTest extends Specification {
     @Autowired
     AccountRepository mockAccountRepository
     @Autowired
-    AddressService addressService
+    AddressService mockAddressService
     @Autowired
     AccountService service
 
@@ -47,7 +51,7 @@ class AccountServiceTest extends Specification {
         service.create(account)
 
         then: "the address is saved"
-        1 * addressService.create(account.address) >> expectedAddressId
+        1 * mockAddressService.create(account.address) >> expectedAddressId
 
         and: "the account is saved"
         1 * mockAccountRepository.save(_) >> { Account arg ->
@@ -100,6 +104,50 @@ class AccountServiceTest extends Specification {
 
         and: "Accounts size is equal"
         accounts.length == dbAccounts.size()
+    }
+
+    def "should throw an exception updating an entity without uuid" () {
+        given: " some account without uuid"
+        account.uuid = null
+
+        when: "the update method is called"
+        service.update(account)
+
+        then: "an exception should be thrown"
+        thrown(InvalidOperationException)
+    }
+
+    def "should update an account without address" () {
+        given: " some account without address"
+        account.address = null
+
+        and: " and with an uuid"
+        account.uuid = UUID.randomUUID()
+
+        when: "The update method is called"
+        service.update(account)
+
+        then: "The delete address method should be called"
+        1 * mockAddressService.deleteAddressFromAccount(account.uuid)
+
+        and: "the update method on repository is called"
+        1 * mockAccountRepository.update(account)
+    }
+
+    def "should update an account with address" () {
+        given: " some account with an uuid"
+        account.uuid = UUID.randomUUID()
+        UUID expectedAddressUuid = UUID.randomUUID()
+        account.address.uuid = expectedAddressUuid
+
+        when: "The update method is called"
+        service.update(account)
+
+        then: "The findByAccountUuid method should be called on address service"
+        1 * mockAddressService.findByAccountUuid(account.uuid) >> account.address
+
+        and: "the update method on address service is called"
+        1 * mockAddressService.update(account.address)
     }
 
 

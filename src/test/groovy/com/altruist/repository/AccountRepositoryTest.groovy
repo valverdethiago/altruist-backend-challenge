@@ -3,6 +3,8 @@ package com.altruist.repository
 import com.altruist.config.DatabaseConfiguration
 import com.altruist.config.RepositoryConfiguration
 import com.altruist.model.Account
+import com.altruist.model.Trade
+import com.altruist.model.TradeSide
 import com.altruist.utils.TestHelper
 import groovy.sql.Sql
 import org.junit.Before
@@ -73,5 +75,24 @@ class AccountRepositoryTest extends Specification {
 
         then: "The returned list has the same size"
         accountList.size() == accounts.length
+    }
+
+    def "Updates an account"() {
+        given: "an account"
+        account = repo.save(account)
+        account.username = "updated-$account.username"
+        account.email = "updated-$account.email"
+
+        when:
+        repo.update(account)
+        Account upToDateAccount = repo.findById(account.uuid)
+
+        then: "the account is returned"
+        upToDateAccount
+
+        and: "the account information is up to date"
+        upToDateAccount.username == account.username
+        upToDateAccount.email == account.email
+
     }
 }
