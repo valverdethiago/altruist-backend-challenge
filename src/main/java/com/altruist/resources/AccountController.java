@@ -23,7 +23,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RestController
 @RequestMapping("/accounts")
 @Slf4j
-public class AccountController extends BasicController {
+public class AccountController {
 
     private final AccountService accountService;
 
