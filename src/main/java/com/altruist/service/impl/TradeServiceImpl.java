@@ -8,6 +8,7 @@ import com.altruist.model.TradeStatus;
 import com.altruist.repository.AccountRepository;
 import com.altruist.repository.TradeRepository;
 import com.altruist.service.TradeService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -25,35 +26,53 @@ public class TradeServiceImpl implements TradeService {
 
     @Override
     public Trade create(Trade trade) {
-       return repository.save(trade);
+        this.assertAccountExists(trade.getAccountUuid());
+        return repository.save(trade);
     }
 
     @Override
     public List<Trade> list(UUID accountUuid) {
-        throw new UnsupportedOperationException("Not implemented Yet");
+        this.assertAccountExists(accountUuid);
+        return this.repository.findByAccount(accountUuid);
     }
 
     @Override
     public void cancelTrade(UUID accountUuid, UUID tradeUuid) {
-        Account account = accountRepository.findById(accountUuid);
-        if(account == null) {
-            throw new EntityNotFoundException(String.format("Invalid id for account [%s]", accountUuid));
-        }
-        Trade trade = repository.findById(tradeUuid);
-        if(trade == null) {
-            throw new EntityNotFoundException(String.format("Invalid id for trade [%s]", tradeUuid));
-        }
-        if(trade.getAccountUuid() != account.getUuid()) {
+        this.assertAccountExists(accountUuid);
+        Trade trade = assertThatTradeExistsAndBelongsToAccount(accountUuid, tradeUuid);
+        if (trade.getStatus() != TradeStatus.SUBMITTED) {
             throw new InvalidOperationException(
-                "The trade you are trying to cancel doesn't belong to the informed account"
-            );
-        }
-        if(trade.getStatus() != TradeStatus.SUBMITTED) {
-            throw new InvalidOperationException(
-                "It's not allowed to cancel trades that are not on SUBMITTED state"
+                String.format("It's not allowed to cancel trades that are not on %s state", TradeStatus.SUBMITTED)
             );
         }
         trade.setStatus(TradeStatus.CANCELLED);
         repository.update(trade);
+    }
+
+    @NotNull
+    private Trade assertThatTradeExistsAndBelongsToAccount(UUID accountUuid, UUID tradeUuid) {
+        Trade trade = this.assertTradeExists(tradeUuid);
+        if (trade.getAccountUuid() != accountUuid) {
+            throw new InvalidOperationException(
+                "The trade you are trying to cancel doesn't belong to the informed account"
+            );
+        }
+        return trade;
+    }
+
+    private Account assertAccountExists(UUID accountUuid) {
+        Account account = accountRepository.findById(accountUuid);
+        if (account == null) {
+            throw new EntityNotFoundException(String.format("Invalid id for account [%s]", accountUuid));
+        }
+        return account;
+    }
+
+    private Trade assertTradeExists(UUID accountUuid) {
+        Trade trade = repository.findById(accountUuid);
+        if (trade == null) {
+            throw new EntityNotFoundException(String.format("Invalid id for account [%s]", accountUuid));
+        }
+        return trade;
     }
 }
