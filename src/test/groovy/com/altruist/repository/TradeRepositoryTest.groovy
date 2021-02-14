@@ -34,7 +34,7 @@ class TradeRepositoryTest extends Specification {
     AccountRepository accountRepository;
 
     @Shared
-    static Account account
+    Account account
 
     def setup() {
         account = new Account(
@@ -62,6 +62,34 @@ class TradeRepositoryTest extends Specification {
 
         and: "the trade status is the default one"
         trade.status == TradeStatus.SUBMITTED
+    }
+
+    def "Updates a trade"() {
+        given: "an trade"
+        Trade trade = new Trade(
+                accountUuid: account.uuid,
+                symbol: "APPL",
+                quantity: 100,
+                side: TradeSide.BUY,
+                price: BigDecimal.valueOf(100.50)
+        )
+        trade = repository.save(trade)
+        trade.quantity = 150
+        trade.symbol = "GOOGL"
+        trade.price = BigDecimal.valueOf(800.65)
+
+        when:
+        repository.update(trade)
+        Trade upToDateTrade = repository.findById(trade.uuid)
+
+        then: "the trade is returned"
+        upToDateTrade
+
+        and: "the trade information is up to date"
+        upToDateTrade.quantity == trade.quantity
+        upToDateTrade.symbol == trade.symbol
+        upToDateTrade.price == trade.price
+
     }
 
 }

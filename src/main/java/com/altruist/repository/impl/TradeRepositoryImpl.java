@@ -45,4 +45,14 @@ public class TradeRepositoryImpl implements TradeRepository {
         }
         return trade;
     }
+
+    @Override
+    public void update(Trade trade) {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    @Override
+    public Trade findById(UUID uuid) {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
 }
