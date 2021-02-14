@@ -4,6 +4,7 @@ import com.altruist.config.ApplicationConfiguration
 import com.altruist.model.Address
 import com.altruist.model.State
 import com.altruist.service.AddressService
+import com.altruist.service.impl.AddressServiceImpl
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -182,7 +183,7 @@ class AddressControllerTest extends Specification {
 
         @Bean
         AddressService addressService() {
-            factory.Mock(AddressService)
+            factory.Mock(AddressServiceImpl)
         }
 
     }

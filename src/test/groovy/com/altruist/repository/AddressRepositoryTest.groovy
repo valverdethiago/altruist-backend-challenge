@@ -4,8 +4,7 @@ import com.altruist.config.DatabaseConfiguration
 import com.altruist.config.RepositoryConfiguration
 import com.altruist.model.Address
 import com.altruist.model.State
-import com.altruist.model.Trade
-import com.altruist.model.TradeSide
+import com.altruist.repository.impl.AddressRepositoryImpl
 import org.junit.Before
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest
@@ -28,7 +27,7 @@ import spock.lang.Stepwise
 @Rollback(true)
 class AddressRepositoryTest extends Specification {
     @Autowired
-    AddressRepository repository
+    AddressRepositoryImpl repository
 
     @Shared
     Address address

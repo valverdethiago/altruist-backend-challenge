@@ -2,10 +2,7 @@ package com.altruist.resources;
 
 import com.altruist.IdDto;
 import com.altruist.model.Address;
-import com.altruist.model.Trade;
 import com.altruist.service.AddressService;
-import com.altruist.service.TradeService;
-import com.altruist.utils.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -7,6 +7,9 @@ import com.altruist.model.Address
 import com.altruist.model.State
 import com.altruist.repository.AccountRepository
 import com.altruist.repository.AddressRepository
+import com.altruist.repository.impl.AccountRepositoryImpl
+import com.altruist.repository.impl.AddressRepositoryImpl
+import com.altruist.service.impl.AddressServiceImpl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -180,31 +183,6 @@ class AddressServiceTest extends Specification {
         then: "an exception is thrown"
         thrown(InvalidOperationException)
     }
-/*
-    def "Should not save address for an invalid account"() {
-        given: "an address and an account"
-        UUID expectedAccountId = UUID.randomUUID()
-        UUID expectedAddressId = UUID.randomUUID()
-        Account account = new Account(
-                uuid: expectedAccountId,
-                username: "someusername",
-                email: "someemail@email.com",
-                address: address
-        )
-
-        and: "the repository can't find the account"
-        1 * mockAccountRepository.findById(expectedAccountId) >> null
-
-        when:
-        service.create(expectedAccountId, address)
-
-        then: "should throw na exception"
-        thrown(EntityNotFoundException)
-
-    }
-
- */
-
 
     @TestConfiguration
     static class TestConfig {
@@ -212,18 +190,18 @@ class AddressServiceTest extends Specification {
 
         @Bean
         AddressRepository addressRepository() {
-            factory.Mock(AddressRepository)
+            factory.Mock(AddressRepositoryImpl)
         }
 
         @Bean
         AccountRepository accountRepository() {
-            factory.Mock(AccountRepository)
+            factory.Mock(AccountRepositoryImpl)
         }
 
         @Bean
         AddressService addressService(AddressRepository addressRepository,
-                                      AccountRepository accountRepository) {
-            return new AddressService(addressRepository, accountRepository)
+                                          AccountRepository accountRepository) {
+            return new AddressServiceImpl(addressRepository, accountRepository)
         }
 
     }

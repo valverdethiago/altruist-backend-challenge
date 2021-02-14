@@ -4,10 +4,9 @@ import com.altruist.exceptions.InvalidOperationException
 import com.altruist.model.Account
 import com.altruist.model.Address
 import com.altruist.model.State
-import com.altruist.model.Trade
-import com.altruist.model.TradeStatus
-import com.altruist.repository.AccountRepository
-import com.altruist.repository.AddressRepository
+import com.altruist.repository.impl.AccountRepositoryImpl
+import com.altruist.service.impl.AccountServiceImpl
+import com.altruist.service.impl.AddressServiceImpl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -19,11 +18,11 @@ import spock.mock.DetachedMockFactory
 @ContextConfiguration(classes = [TestConfig])
 class AccountServiceTest extends Specification {
     @Autowired
-    AccountRepository mockAccountRepository
+    AccountRepositoryImpl mockAccountRepository
     @Autowired
-    AddressService mockAddressService
+    AddressServiceImpl mockAddressService
     @Autowired
-    AccountService service
+    AccountServiceImpl service
 
     @Shared
     Account account
@@ -156,18 +155,18 @@ class AccountServiceTest extends Specification {
         DetachedMockFactory factory = new DetachedMockFactory()
 
         @Bean
-        AccountRepository accountRepository() {
-            factory.Mock(AccountRepository)
+        AccountRepositoryImpl accountRepository() {
+            factory.Mock(AccountRepositoryImpl)
         }
 
         @Bean
-        AddressService addressService() {
-            factory.Mock(AddressService)
+        AddressServiceImpl addressService() {
+            factory.Mock(AddressServiceImpl)
         }
 
         @Bean
-        AccountService accountService() {
-            return new AccountService(accountRepository(), addressService())
+        AccountServiceImpl accountService() {
+            return new AccountServiceImpl(accountRepository(), addressService())
         }
     }
 }
