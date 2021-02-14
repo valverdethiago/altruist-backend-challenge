@@ -1,15 +1,21 @@
 package com.altruist.repository.impl;
 
 import com.altruist.model.Trade;
+import com.altruist.model.TradeSide;
 import com.altruist.model.TradeStatus;
 import com.altruist.repository.TradeRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
 
@@ -18,9 +24,12 @@ import java.util.*;
 public class TradeRepositoryImpl implements TradeRepository {
 
     private final NamedParameterJdbcOperations jdbcOperations;
+    private final JdbcTemplate jdbcTemplate;
 
-    public TradeRepositoryImpl(NamedParameterJdbcOperations jdbcOperations) {
+    public TradeRepositoryImpl(NamedParameterJdbcOperations jdbcOperations,
+                               JdbcTemplate jdbcTemplate) {
         this.jdbcOperations = jdbcOperations;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
@@ -48,11 +57,52 @@ public class TradeRepositoryImpl implements TradeRepository {
 
     @Override
     public void update(Trade trade) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        BeanPropertySqlParameterSource params = new BeanPropertySqlParameterSource(trade);
+        params.registerSqlType("side", Types.VARCHAR);
+        params.registerSqlType("status", Types.VARCHAR);
+        log.info("Saving trade [{}].", trade);
+        String sql = "UPDATE trade.trade SET " +
+            "  symbol = :symbol, " +
+            "  quantity = :quantity, " +
+            "  side = :side::trade.trade_side, " +
+            "  price = :price, " +
+            "  status = :status::trade.trade_status " +
+            " WHERE trade_uuid = :uuid ";
+        try {
+            jdbcOperations.update(sql, params);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            log.warn("Update of trade record failed. {}", trade);
+            throw new RuntimeException("Update failed for trade", ex);
+        }
     }
 
     @Override
     public Trade findById(UUID uuid) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return this.jdbcTemplate.queryForObject(
+            "select trade.*, " +
+                "trade.quantity * trade.price as total_amount " +
+                "from trade.trade as trade " +
+                "where trade_uuid = ? ",
+            new Object[] {uuid},
+            new TradeMapper());
+    }
+
+    private class TradeMapper implements RowMapper<Trade> {
+
+        @Override
+        public Trade mapRow(ResultSet rs, int rowNum) throws SQLException {
+            return Trade.builder()
+                .uuid(UUID.fromString(rs.getString("trade_uuid")))
+                .accountUuid(UUID.fromString(rs.getString("account_uuid")))
+                .symbol(rs.getString("symbol"))
+                .quantity(rs.getInt("quantity"))
+                .side(TradeSide.valueOf(rs.getString("side")))
+                .price(rs.getBigDecimal("price"))
+                .status(TradeStatus.valueOf(rs.getString("status")))
+                .totalAmount(rs.getBigDecimal("total_amount"))
+                .build();
+        }
     }
 }

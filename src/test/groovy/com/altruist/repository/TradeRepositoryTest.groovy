@@ -62,6 +62,20 @@ class TradeRepositoryTest extends Specification {
 
         and: "the trade status is the default one"
         trade.status == TradeStatus.SUBMITTED
+
+        and: "the inserted trade is found "
+        Trade insertedTrade = repository.findById(trade.uuid)
+        insertedTrade
+        insertedTrade.uuid == trade.uuid
+        insertedTrade.quantity == trade.quantity
+        insertedTrade.price == trade.price
+        insertedTrade.symbol == trade.symbol
+        insertedTrade.status == trade.status
+        insertedTrade.accountUuid == trade.accountUuid
+        insertedTrade.side == trade.side
+
+        and: "the total amount is correct"
+        insertedTrade.totalAmount == trade.price * trade.quantity
     }
 
     def "Updates a trade"() {

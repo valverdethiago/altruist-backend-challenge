@@ -1,7 +1,10 @@
 package com.altruist.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -10,6 +13,9 @@ import java.math.BigDecimal;
 import java.util.*;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Trade {
 
     @JsonIgnore
@@ -28,4 +34,5 @@ public class Trade {
     private BigDecimal price;
     @NotNull
     private TradeStatus status;
+    private BigDecimal totalAmount;
 }
