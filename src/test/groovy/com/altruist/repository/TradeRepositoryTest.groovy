@@ -7,6 +7,7 @@ import com.altruist.model.Account
 import com.altruist.model.Trade
 import com.altruist.model.TradeSide
 import com.altruist.model.TradeStatus
+import com.altruist.repository.impl.AccountRepositoryImpl
 import com.altruist.utils.TestHelper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest
@@ -31,7 +32,7 @@ class TradeRepositoryTest extends Specification {
     @Autowired
     TradeRepository repository
     @Autowired
-    AccountRepository accountRepository;
+    AccountRepositoryImpl accountRepository
 
     @Shared
     Account account

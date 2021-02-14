@@ -7,7 +7,9 @@ import com.altruist.model.Trade
 import com.altruist.model.TradeSide
 import com.altruist.model.TradeStatus
 import com.altruist.repository.AccountRepository
+import com.altruist.repository.impl.AccountRepositoryImpl
 import com.altruist.repository.TradeRepository
+import com.altruist.repository.impl.TradeRepositoryImpl
 import com.altruist.service.impl.TradeServiceImpl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.TestConfiguration
@@ -195,15 +197,16 @@ class TradeServiceTest extends Specification {
 
         @Bean
         TradeRepository tradeRepository() {
-            factory.Mock(TradeRepository)
-        }
-        @Bean
-        AccountRepository accountRepository() {
-            factory.Mock(AccountRepository)
+            factory.Mock(TradeRepositoryImpl)
         }
 
         @Bean
-        TradeService tradeService(TradeRepository tradeRepository, AccountRepository accountRepository) {
+        AccountRepository accountRepository() {
+            factory.Mock(AccountRepositoryImpl)
+        }
+
+        @Bean
+        TradeService tradeService(TradeRepository tradeRepository, AccountRepositoryImpl accountRepository) {
             return new TradeServiceImpl(tradeRepository, accountRepository)
         }
     }

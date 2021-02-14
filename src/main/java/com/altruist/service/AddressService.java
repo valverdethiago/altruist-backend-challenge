@@ -1,24 +1,20 @@
 package com.altruist.service;
 
 import com.altruist.model.Address;
-import com.altruist.repository.AddressRepository;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
+import lombok.NonNull;
 
-import javax.validation.Valid;
 import java.util.*;
 
-@Service
-public class AddressService {
-  private final AddressRepository addressRepository;
+public interface AddressService {
+    UUID create(Address address);
 
-  public AddressService(AddressRepository addressRepository) {
-    this.addressRepository = addressRepository;
-  }
+    UUID create(@NonNull UUID accountUuid, Address address);
 
+    void update(Address address);
 
-  public UUID create(Address address) {
-    return addressRepository.save(address).getUuid();
-  }
+    void update(@NonNull UUID accountUuid, Address address);
+
+    Address findByAccountUuid(@NonNull UUID accountUuid);
+
+    void deleteAddressFromAccount(@NonNull UUID accountUuid);
 }

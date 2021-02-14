@@ -6,6 +6,8 @@ import com.altruist.model.Address
 import com.altruist.model.State
 import com.altruist.service.AccountService
 import com.altruist.service.AddressService
+import com.altruist.service.impl.AccountServiceImpl
+import com.altruist.service.impl.AddressServiceImpl
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -175,12 +177,12 @@ class AccountControllerTest extends Specification {
 
         @Bean
         AccountService accountService() {
-            factory.Mock(AccountService)
+            factory.Mock(AccountServiceImpl)
         }
 
         @Bean
         AddressService addressService() {
-            factory.Mock(AddressService)
+            factory.Mock(AddressServiceImpl)
         }
     }
 }
