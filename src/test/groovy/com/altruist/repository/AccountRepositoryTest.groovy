@@ -3,6 +3,7 @@ package com.altruist.repository
 import com.altruist.config.DatabaseConfiguration
 import com.altruist.config.RepositoryConfiguration
 import com.altruist.model.Account
+import com.altruist.utils.TestHelper
 import groovy.sql.Sql
 import org.junit.Before
 import org.springframework.beans.factory.annotation.Autowired
@@ -28,17 +29,49 @@ class AccountRepositoryTest extends Specification {
     @Autowired
     AccountRepository repo
 
+    @Shared
+    Account account
+
+    def setup() {
+        account = new Account(
+                username: "username123",
+                email: "email@example.com"
+        )
+    }
+
     def "Inserts an account"() {
         given: "an account"
-        Account account = new Account(
-            username: "username123",
-            email: "email@example.com"
-        )
 
         when:
         repo.save(account)
 
         then: "the account id is returned"
         account.uuid
+    }
+
+    def "Returns list of accounts"() {
+        given: "some accounts"
+        Account[] accounts = [account,
+                              new Account(
+                                      username: "username2",
+                                      email: "somemail2@mail.com"
+                              ),
+                              new Account(
+                                      username: "username3",
+                                      email: "somemail2@mail.com"
+                              ),
+                              new Account(
+                                      username: "username4",
+                                      email: "somemail2@mail.com"
+                              )]
+
+        and: "All accounts are saved"
+        accounts.each {item -> repo.save(item)}
+
+        when: "The list method is called"
+        List<Account> accountList = repo.listAll()
+
+        then: "The returned list has the same size"
+        accountList.size() == accounts.length
     }
 }

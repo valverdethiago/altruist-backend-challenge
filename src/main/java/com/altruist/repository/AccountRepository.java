@@ -57,6 +57,14 @@ public class AccountRepository {
         new Object[] {accountUuId},
         new AccountMapper());
   }
+
+  public List<Account> listAll() {
+    return this.jdbcTemplate.query(
+        "select * " +
+            "from trade.account ",
+        new AccountMapper());
+  }
+
   private class AccountMapper implements RowMapper<Account> {
 
     @Override
