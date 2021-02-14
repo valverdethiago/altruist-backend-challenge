@@ -3,7 +3,9 @@ package com.altruist.resources
 import com.altruist.config.ApplicationConfiguration
 import com.altruist.model.Account
 import com.altruist.model.Address
+import com.altruist.model.State
 import com.altruist.service.AccountService
+import com.altruist.service.AddressService
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -34,16 +36,17 @@ class AccountControllerTest extends Specification {
 
     def "Should accept complete account requests"() {
         given: "an account request"
+        Address address = new Address(
+                name: "Some Name",
+                street: "Some street",
+                city: "Some city",
+                state: "CA",
+                zipcode: 99999
+        )
         Account req = new Account(
                 username: "username123",
                 email: "email@example.com",
-                address: new Address(
-                    name: "Some Name",
-                    street: "Some street",
-                    city: "Some city",
-                    state: "CA",
-                    zipcode: 99999
-                )
+                address: address
         )
         UUID expectedId = UUID.randomUUID()
 
@@ -136,6 +139,36 @@ class AccountControllerTest extends Specification {
         results.andExpect(status().isBadRequest())
     }
 
+    def "Should validate for missing address field #field"() {
+        given: "an address missing fields"
+        Address address = new Address(
+                name: "Some Name",
+                street: "Some street",
+                city: "Some city",
+                state: State.CA,
+                zipcode: 99999
+        )
+        Account account = new Account(
+                username: "username123",
+                email: "email@example.com",
+                address: address
+        )
+        account.address[field] = null
+
+        when: "the request is submitted"
+        ResultActions results = mvc.perform(post("/accounts")
+                .accept(APPLICATION_JSON)
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(account))
+        )
+
+        then: "a BadRequest response is returned"
+        results.andExpect(status().isBadRequest())
+
+        where:
+        field << ["name", "street", "city", "state", "zipcode"]
+    }
+
     @TestConfiguration
     static class TestConfig {
         DetachedMockFactory factory = new DetachedMockFactory()
@@ -143,6 +176,11 @@ class AccountControllerTest extends Specification {
         @Bean
         AccountService accountService() {
             factory.Mock(AccountService)
+        }
+
+        @Bean
+        AddressService addressService() {
+            factory.Mock(AddressService)
         }
     }
 }

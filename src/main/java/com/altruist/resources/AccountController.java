@@ -44,7 +44,7 @@ public class AccountController {
 
     private URI buildEntityUrl(HttpServletRequest httpServletRequest, UUID accountId) {
         try {
-            return new URI(httpServletRequest.getRequestURL() + "/accounts/" + accountId.toString());
+            return new URI(httpServletRequest.getRequestURL() + "/" + accountId.toString());
         } catch (URISyntaxException e) {
             log.warn("Error generating url for {}", accountId);
             return null;
