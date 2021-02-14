@@ -3,6 +3,7 @@ package com.altruist.resources;
 import com.altruist.IdDto;
 import com.altruist.model.Account;
 import com.altruist.service.AccountService;
+import com.altruist.utils.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RestController
 @RequestMapping("/accounts")
 @Slf4j
-public class AccountController {
+public class AccountController extends BasicController {
 
     private final AccountService accountService;
 
@@ -32,22 +33,13 @@ public class AccountController {
 
     @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<IdDto> create(
-        @RequestBody @Valid Account account,
-        HttpServletRequest httpServletRequest) {
+    public ResponseEntity<IdDto> create(@RequestBody @Valid Account account,
+                                        HttpServletRequest httpServletRequest) {
         log.info("Received Account creation request [{}].", account);
         UUID accountId = accountService.create(account);
-        URI entityURI = this.buildEntityUrl(httpServletRequest, accountId);
+        URI entityURI = HttpUtils.buildEntityUrl(httpServletRequest, accountId);
         return ResponseEntity.created(entityURI)
             .body(new IdDto(accountId));
     }
 
-    private URI buildEntityUrl(HttpServletRequest httpServletRequest, UUID accountId) {
-        try {
-            return new URI(httpServletRequest.getRequestURL() + "/" + accountId.toString());
-        } catch (URISyntaxException e) {
-            log.warn("Error generating url for {}", accountId);
-            return null;
-        }
-    }
 }
