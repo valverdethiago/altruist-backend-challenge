@@ -55,6 +55,9 @@ class TradeServiceTest extends Specification {
         given: "an trade"
         UUID expectedUuid = UUID.randomUUID()
 
+        and: "an account repository able to find the account for the trade"
+        1 * mockAccountRepository.findById(trade.accountUuid) >> account
+
         when:
         trade = service.create(trade)
 
@@ -78,6 +81,17 @@ class TradeServiceTest extends Specification {
 
         and: "the uuid is saved"
         trade.uuid == expectedUuid
+    }
+
+    def "Should not save trade for unknown account"() {
+        given: "an account repository that can't to find the account for the trade"
+        1 * mockAccountRepository.findById(trade.accountUuid) >> null
+
+        when:
+        trade = service.create(trade)
+
+        then: "an exception is thrown"
+        thrown(EntityNotFoundException)
     }
 
 
