@@ -3,6 +3,9 @@ package com.altruist.repository
 import com.altruist.config.DatabaseConfiguration
 import com.altruist.config.RepositoryConfiguration
 import com.altruist.model.Address
+import com.altruist.model.State
+import com.altruist.model.Trade
+import com.altruist.model.TradeSide
 import org.junit.Before
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest
@@ -49,6 +52,31 @@ class AddressRepositoryTest extends Specification {
 
         then: "the address id is returned"
         address.uuid
+    }
+
+    def "Updates an address"() {
+        given: "an address"
+        address = repository.save(address)
+        address.zipcode = address.zipcode+1
+        address.state = State.AK
+        address.city = "updated-$address.city"
+        address.street = "updated-$address.street"
+        address.name = "updated-$address.name"
+
+        when:
+        repository.update(address)
+        Address upToDateAddress = repository.findById(address.uuid)
+
+        then: "the trade is returned"
+        upToDateAddress
+
+        and: "the trade information is up to date"
+        upToDateAddress.zipcode == address.zipcode
+        upToDateAddress.state == address.state
+        upToDateAddress.city == address.city
+        upToDateAddress.street == address.street
+        upToDateAddress.name == address.name
+
     }
 
 }
