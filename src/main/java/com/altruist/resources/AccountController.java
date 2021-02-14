@@ -3,6 +3,7 @@ package com.altruist.resources;
 import com.altruist.IdDto;
 import com.altruist.model.Account;
 import com.altruist.service.AccountService;
+import com.altruist.utils.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,21 +25,21 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @Slf4j
 public class AccountController {
 
-  private final AccountService accountService;
+    private final AccountService accountService;
 
-  public AccountController(AccountService accountService) {
-    this.accountService = accountService;
-  }
+    public AccountController(AccountService accountService) {
+        this.accountService = accountService;
+    }
 
-  @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-  @ResponseStatus(HttpStatus.CREATED)
-  public ResponseEntity<IdDto> create(
-      @RequestBody @Valid Account account,
-      HttpServletRequest httpServletRequest
-  ) throws URISyntaxException {
-    log.info("Received Account creation request [{}].", account);
-    UUID accountId = accountService.create(account);
-    return ResponseEntity.created(new URI(httpServletRequest.getRequestURL() + "/accounts/" + accountId.toString()))
-        .body(new IdDto(accountId));
-  }
+    @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<IdDto> create(@RequestBody @Valid Account account,
+                                        HttpServletRequest httpServletRequest) {
+        log.info("Received Account creation request [{}].", account);
+        UUID accountId = accountService.create(account);
+        URI entityURI = HttpUtils.buildEntityUrl(httpServletRequest, accountId);
+        return ResponseEntity.created(entityURI)
+            .body(new IdDto(accountId));
+    }
+
 }

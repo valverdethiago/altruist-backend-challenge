@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.test.context.ContextConfiguration
 import spock.lang.Specification
+import spock.lang.Unroll
 import spock.mock.DetachedMockFactory
 
 @ContextConfiguration(classes = [TestConfig])
@@ -16,9 +17,28 @@ class AccountServiceTest extends Specification {
     @Autowired
     AccountRepository mockAccountRepository
     @Autowired
-    AddressService mockAddressService
+    AddressService addressService
     @Autowired
     AccountService service
+
+    @Unroll
+    def "Should validate for missing account field #field"() {
+        given: "an account missing fields"
+        Account account = new Account(
+                username: "username123",
+                email: "email@example.com",
+        )
+        account[field] = null
+
+        when:
+        service.create(account)
+
+        then:
+        thrown(NullPointerException)
+
+        where:
+        field << ["username", "email"]
+    }
 
     def "Should save account and address"() {
         given: "an account"
@@ -40,7 +60,7 @@ class AccountServiceTest extends Specification {
         service.create(account)
 
         then: "the address is saved"
-        1 * mockAddressService.create(account.address) >> expectedAddressId
+        1 * addressService.create(account.address) >> expectedAddressId
 
         and: "the account is saved"
         1 * mockAccountRepository.save(_) >> { Account arg ->
@@ -71,8 +91,8 @@ class AccountServiceTest extends Specification {
         }
 
         @Bean
-        AccountService accountService(AccountRepository accountRepository, AddressService addressService) {
-            return new AccountService(accountRepository, addressService)
+        AccountService accountService() {
+            return new AccountService(accountRepository(), addressService());
         }
     }
 }
