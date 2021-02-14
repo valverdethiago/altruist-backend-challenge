@@ -24,21 +24,30 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @Slf4j
 public class AccountController {
 
-  private final AccountService accountService;
+    private final AccountService accountService;
 
-  public AccountController(AccountService accountService) {
-    this.accountService = accountService;
-  }
+    public AccountController(AccountService accountService) {
+        this.accountService = accountService;
+    }
 
-  @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-  @ResponseStatus(HttpStatus.CREATED)
-  public ResponseEntity<IdDto> create(
-      @RequestBody @Valid Account account,
-      HttpServletRequest httpServletRequest
-  ) throws URISyntaxException {
-    log.info("Received Account creation request [{}].", account);
-    UUID accountId = accountService.create(account);
-    return ResponseEntity.created(new URI(httpServletRequest.getRequestURL() + "/accounts/" + accountId.toString()))
-        .body(new IdDto(accountId));
-  }
+    @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<IdDto> create(
+        @RequestBody @Valid Account account,
+        HttpServletRequest httpServletRequest) {
+        log.info("Received Account creation request [{}].", account);
+        UUID accountId = accountService.create(account);
+        URI entityURI = this.buildEntityUrl(httpServletRequest, accountId);
+        return ResponseEntity.created(entityURI)
+            .body(new IdDto(accountId));
+    }
+
+    private URI buildEntityUrl(HttpServletRequest httpServletRequest, UUID accountId) {
+        try {
+            return new URI(httpServletRequest.getRequestURL() + "/" + accountId.toString());
+        } catch (URISyntaxException e) {
+            log.warn("Error generating url for {}", accountId);
+            return null;
+        }
+    }
 }
