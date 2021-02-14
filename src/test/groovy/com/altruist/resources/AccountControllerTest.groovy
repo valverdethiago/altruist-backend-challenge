@@ -2,6 +2,7 @@ package com.altruist.resources
 
 import com.altruist.model.Account
 import com.altruist.model.Address
+import com.altruist.model.State
 import com.altruist.service.AccountService
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
@@ -11,6 +12,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.ResultActions
 import spock.lang.Specification
+import spock.lang.Unroll
 import spock.mock.DetachedMockFactory
 
 import static org.hamcrest.Matchers.containsString
@@ -61,6 +63,59 @@ class AccountControllerTest extends Specification {
         results.andExpect(header().exists("Location"))
                 .andExpect(header().string("Location", containsString("/accounts/$expectedId")))
         results.andExpect(content().json("""{"id":"$expectedId"}"""))
+    }
+
+    @Unroll
+    def "Should validate for missing account field #field"() {
+        given: "an account request"
+        Account req = new Account(
+                username: "username123",
+                email: "email@example.com"
+        )
+        req[field] = null
+
+        when: "the request is submitted"
+        ResultActions results = mvc.perform(post("/accounts")
+                .accept(APPLICATION_JSON)
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req))
+        )
+
+        then: "a bad request is returned"
+        results.andExpect(status().isBadRequest())
+
+        where:
+        field << ["username", "email"]
+    }
+
+    @Unroll
+    def "Should validate for missing address field #field"() {
+        given: "an account request"
+        Account req = new Account(
+                username: "username123",
+                email: "email@example.com",
+                address: new Address(
+                        name: "Some Name",
+                        street: "Some street",
+                        city: "Some city",
+                        state: State.CA,
+                        zipcode: 99999
+                )
+        )
+        req.address[field] = null
+
+        when: "the request is submitted"
+        ResultActions results = mvc.perform(post("/accounts")
+                .accept(APPLICATION_JSON)
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req))
+        )
+
+        then: "a bad request is returned"
+        results.andExpect(status().isBadRequest())
+
+        where:
+        field << ["name", "street", "city", "state", "zipcode"]
     }
 
     @TestConfiguration
