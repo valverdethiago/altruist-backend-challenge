@@ -2,9 +2,11 @@ package com.altruist.service
 
 import com.altruist.exceptions.EntityNotFoundException
 import com.altruist.exceptions.InvalidOperationException
+import com.altruist.model.Account
 import com.altruist.model.Trade
 import com.altruist.model.TradeSide
 import com.altruist.model.TradeStatus
+import com.altruist.repository.AccountRepository
 import com.altruist.repository.TradeRepository
 import com.altruist.service.impl.TradeServiceImpl
 import org.springframework.beans.factory.annotation.Autowired
@@ -19,20 +21,33 @@ import spock.mock.DetachedMockFactory
 class TradeServiceTest extends Specification {
     @Autowired
     TradeRepository mockTradeRepository
+
+    @Autowired
+    AccountRepository mockAccountRepository
+
     @Autowired
     TradeService service
 
     @Shared
     Trade trade
 
+    @Shared
+    Account account
+
     def setup() {
+        account = new Account(
+                uuid: UUID.randomUUID(),
+                username: "someusername",
+                email: "somemail@email.com"
+        )
         trade = new Trade(
-                accountUuid: UUID.randomUUID(),
+                accountUuid: account.uuid,
                 symbol: "SYMBOL",
                 quantity : 100,
                 side: TradeSide.BUY,
                 price : BigDecimal.valueOf(150.00)
         )
+
     }
 
 
@@ -74,11 +89,14 @@ class TradeServiceTest extends Specification {
         trade.uuid = expectedUuid
         trade.status = TradeStatus.SUBMITTED
 
-        and: "a repository that find the entity by id"
+        and: "a repository that finds the trade by id"
         1 * mockTradeRepository.findById(expectedUuid) >> trade
 
+        and: "a repository that finds the account by id"
+        1 * mockAccountRepository.findById(account.uuid) >> account
+
         when:
-        trade = service.cancelTrade(trade.uuid)
+        trade = service.cancelTrade(account.uuid, trade.uuid)
 
         then: "the trade is cancelled"
         1 * mockTradeRepository.update(_) >>  { Trade arg ->
@@ -108,8 +126,11 @@ class TradeServiceTest extends Specification {
         and: "a repository that find the entity by id"
         1 * mockTradeRepository.findById(expectedUuid) >> trade
 
+        and: "a repository that finds the account by id"
+        1 * mockAccountRepository.findById(account.uuid) >> account
+
         when:
-        trade = service.cancelTrade(trade.uuid)
+        trade = service.cancelTrade(account.uuid, trade.uuid)
 
         then: "the trade is cancelled"
         thrown(InvalidOperationException)
@@ -122,11 +143,35 @@ class TradeServiceTest extends Specification {
         and: "a repository that can't find the entity by id"
         1 * mockTradeRepository.findById(expectedUuid) >> null
 
-        when:
-        trade = service.cancelTrade(expectedUuid)
+        and: "a repository that finds the account by id"
+        1 * mockAccountRepository.findById(account.uuid) >> account
 
-        then: "the trade is cancelled"
+        when:
+        trade = service.cancelTrade(account.uuid, expectedUuid)
+
+        then: "an exception is thrown"
         thrown(EntityNotFoundException)
+    }
+
+    def "Should throw an error trying to cancel a trade that doesn't belong to account"() {
+        given: "an uuid"
+        UUID expectedUuid = UUID.randomUUID()
+
+        and: "a repository that can't find the entity by id"
+        1 * mockTradeRepository.findById(expectedUuid) >> trade
+
+        and: "a repository that finds another different account"
+        1 * mockAccountRepository.findById(trade.accountUuid) >> new Account(
+                uuid: UUID.randomUUID(),
+                username: "anotherusername",
+                email: "anothermail@email.com"
+        )
+
+        when:
+        trade = service.cancelTrade(trade.accountUuid, expectedUuid)
+
+        then: "an exception is thrown"
+        thrown(InvalidOperationException)
     }
 
 
@@ -138,10 +183,14 @@ class TradeServiceTest extends Specification {
         TradeRepository tradeRepository() {
             factory.Mock(TradeRepository)
         }
+        @Bean
+        AccountRepository accountRepository() {
+            factory.Mock(AccountRepository)
+        }
 
         @Bean
-        TradeService tradeService(TradeRepository tradeRepository) {
-            return new TradeServiceImpl(tradeRepository);
+        TradeService tradeService(TradeRepository tradeRepository, AccountRepository accountRepository) {
+            return new TradeServiceImpl(tradeRepository, accountRepository)
         }
     }
 }

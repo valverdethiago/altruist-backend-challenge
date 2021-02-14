@@ -8,6 +8,6 @@ public interface TradeService {
 
     Trade create(Trade trade);
     List<Trade> list(UUID accountUuid);
-    void cancelTrade(UUID tradeUuid);
+    void cancelTrade(UUID accountId, UUID tradeUuid);
 
 }

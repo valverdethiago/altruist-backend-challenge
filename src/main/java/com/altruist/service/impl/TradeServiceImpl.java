@@ -2,8 +2,10 @@ package com.altruist.service.impl;
 
 import com.altruist.exceptions.EntityNotFoundException;
 import com.altruist.exceptions.InvalidOperationException;
+import com.altruist.model.Account;
 import com.altruist.model.Trade;
 import com.altruist.model.TradeStatus;
+import com.altruist.repository.AccountRepository;
 import com.altruist.repository.TradeRepository;
 import com.altruist.service.TradeService;
 import org.springframework.stereotype.Service;
@@ -14,9 +16,11 @@ import java.util.*;
 public class TradeServiceImpl implements TradeService {
 
     private final TradeRepository repository;
+    private final AccountRepository accountRepository;
 
-    public TradeServiceImpl(TradeRepository repository) {
+    public TradeServiceImpl(TradeRepository repository, AccountRepository accountRepository) {
         this.repository = repository;
+        this.accountRepository = accountRepository;
     }
 
     @Override
@@ -30,10 +34,19 @@ public class TradeServiceImpl implements TradeService {
     }
 
     @Override
-    public void cancelTrade(UUID tradeUuid) {
+    public void cancelTrade(UUID accountUuid, UUID tradeUuid) {
+        Account account = accountRepository.findById(accountUuid);
+        if(account == null) {
+            throw new EntityNotFoundException(String.format("Invalid id for account [%s]", accountUuid));
+        }
         Trade trade = repository.findById(tradeUuid);
         if(trade == null) {
-            throw new EntityNotFoundException();
+            throw new EntityNotFoundException(String.format("Invalid id for trade [%s]", tradeUuid));
+        }
+        if(trade.getAccountUuid() != account.getUuid()) {
+            throw new InvalidOperationException(
+                "The trade you are trying to cancel doesn't belong to the informed account"
+            );
         }
         if(trade.getStatus() != TradeStatus.SUBMITTED) {
             throw new InvalidOperationException(
