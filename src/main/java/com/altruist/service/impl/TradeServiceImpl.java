@@ -68,10 +68,10 @@ public class TradeServiceImpl implements TradeService {
         return account;
     }
 
-    private Trade assertTradeExists(UUID accountUuid) {
-        Trade trade = repository.findById(accountUuid);
+    private Trade assertTradeExists(UUID tradeUuid) {
+        Trade trade = repository.findById(tradeUuid);
         if (trade == null) {
-            throw new EntityNotFoundException(String.format("Invalid id for account [%s]", accountUuid));
+            throw new EntityNotFoundException(String.format("Invalid id for trade [%s]", tradeUuid));
         }
         return trade;
     }
