@@ -1,13 +1,13 @@
 package com.altruist.repository
 
+
 import com.altruist.config.DatabaseConfiguration
 import com.altruist.config.RepositoryConfiguration
 import com.altruist.model.Account
-import com.altruist.model.Address
 import com.altruist.model.Trade
 import com.altruist.model.TradeSide
 import com.altruist.model.TradeStatus
-import org.junit.Before
+import com.altruist.utils.TestHelper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
@@ -106,4 +106,37 @@ class TradeRepositoryTest extends Specification {
 
     }
 
+    def "Inserts a list of trades"() {
+        given: "a trade"
+        Trade trade = new Trade(
+                accountUuid: account.uuid,
+                symbol: "APPL",
+                quantity: 100,
+                side: TradeSide.BUY,
+                price: BigDecimal.valueOf(100.50)
+        )
+
+        and: "a trade list"
+        Trade[] trades = [trade,
+                          TestHelper.deepCopy(trade),
+                          TestHelper.deepCopy(trade),
+                          TestHelper.deepCopy(trade),
+                          TestHelper.deepCopy(trade)]
+
+        and: "saving the trade list on the database"
+        trades.each {item -> repository.save(item)}
+
+        when:
+        Trade[] dbTrades = repository.findByAccount(account.uuid)
+
+        then: "the trades ids are returned"
+        dbTrades
+        dbTrades.each {item -> item.uuid}
+
+        and: "the trades list is the same as expected"
+        dbTrades.length == trades.length
+
+        and: "the total amount is correct"
+        dbTrades.each {item -> item.totalAmount == item.price * item.quantity }
+    }
 }

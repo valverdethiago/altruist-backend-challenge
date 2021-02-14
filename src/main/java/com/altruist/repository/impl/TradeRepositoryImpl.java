@@ -89,6 +89,17 @@ public class TradeRepositoryImpl implements TradeRepository {
             new TradeMapper());
     }
 
+    @Override
+    public List<Trade> findByAccount(UUID accountUuid) {
+        return this.jdbcTemplate.query(
+            "select trade.*, " +
+                "trade.quantity * trade.price as total_amount " +
+                "from trade.trade as trade " +
+                "where account_uuid = ? ",
+            new Object[] {accountUuid},
+            new TradeMapper());
+    }
+
     private class TradeMapper implements RowMapper<Trade> {
 
         @Override
