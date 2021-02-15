@@ -2,11 +2,15 @@ package com.altruist.resources;
 
 import com.altruist.IdDto;
 import com.altruist.model.Account;
+import com.altruist.model.Address;
+import com.altruist.model.Trade;
 import com.altruist.service.AccountService;
 import com.altruist.utils.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.net.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -40,6 +45,29 @@ public class AccountController {
         URI entityURI = HttpUtils.buildEntityUrl(httpServletRequest, accountId);
         return ResponseEntity.created(entityURI)
             .body(new IdDto(accountId));
+    }
+
+    @GetMapping(produces = APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Account>> listAll() {
+        log.info("Listing all accounts");
+        List<Account> accounts = accountService.listAll();
+        if(accounts == null || accounts.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok()
+            .body(accounts);
+    }
+
+
+    @GetMapping(produces = APPLICATION_JSON_VALUE, value = "/{accountUuid}")
+    public ResponseEntity<Account> get(@PathVariable("accountUuid") UUID accountUuid) {
+        log.info("Fetching account with id[{}].", accountUuid);
+        AtomicReference<ResponseEntity<Account>> result = new AtomicReference<>();
+        accountService.findById(accountUuid).ifPresentOrElse(
+            (account) -> result.set(ResponseEntity.ok(account)),
+            () -> result.set(ResponseEntity.notFound().build())
+        );
+        return result.get();
     }
 
 }
