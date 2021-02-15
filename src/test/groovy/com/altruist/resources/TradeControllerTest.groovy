@@ -67,7 +67,7 @@ class TradeControllerTest extends Specification {
         )
 
         then: "the request is processed"
-        1 * mockTradeService.create(_) >> { Trade arg ->
+        1 * mockTradeService.create(trade) >> { Trade arg ->
             with(arg){
                 accountUuid : trade.accountUuid
                 symbol: trade.symbol

@@ -107,6 +107,23 @@ public class TradeRepositoryImpl implements TradeRepository {
             new TradeMapper());
     }
 
+    @Override
+    public Optional<Trade> findByIdAndAccountId(UUID tradeUuid, UUID accountUuid) {
+        try {
+            return Optional.ofNullable(this.jdbcTemplate.queryForObject(
+                "select trade.*, " +
+                    "trade.quantity * trade.price as total_amount " +
+                    "from trade.trade as trade " +
+                    "where trade_uuid = ? and account_uuid = ?",
+                new Object[] {tradeUuid, accountUuid},
+                new TradeMapper()));
+        }
+        catch (EmptyResultDataAccessException ex) {
+            log.warn("No trade found for id {} on account {}", tradeUuid, accountUuid);
+            return Optional.empty();
+        }
+    }
+
     private class TradeMapper implements RowMapper<Trade> {
 
         @Override

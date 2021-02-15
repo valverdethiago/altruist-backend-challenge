@@ -12,6 +12,9 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static java.util.Optional.*;
 
 @Service
 public class TradeServiceImpl implements TradeService {
@@ -47,6 +50,14 @@ public class TradeServiceImpl implements TradeService {
         }
         trade.setStatus(TradeStatus.CANCELLED);
         repository.update(trade);
+    }
+
+    @Override
+    public Optional<Trade> findByIdAndAccountId(UUID tradeUuid, UUID accountUuid) {
+        Optional<Trade> trade = this.repository.findByIdAndAccountId(tradeUuid, accountUuid);
+        AtomicReference<Optional<Trade>> result = new AtomicReference<>(empty());
+        trade.ifPresent((item) -> result.set(of(item)));
+        return result.get();
     }
 
     @NotNull
