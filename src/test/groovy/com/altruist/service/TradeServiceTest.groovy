@@ -2,6 +2,7 @@ package com.altruist.service
 
 import com.altruist.exceptions.EntityNotFoundException
 import com.altruist.exceptions.InvalidOperationException
+import com.altruist.exceptions.InvalidTradeStatusException
 import com.altruist.model.Account
 import com.altruist.model.Trade
 import com.altruist.model.TradeSide
@@ -149,7 +150,7 @@ class TradeServiceTest extends Specification {
         trade = service.cancelTrade(account.uuid, trade.uuid)
 
         then: "the trade is cancelled"
-        thrown(InvalidOperationException)
+        thrown(InvalidTradeStatusException)
     }
 
     def "Should throw an error trying to cancel a not found trade"() {
@@ -173,8 +174,13 @@ class TradeServiceTest extends Specification {
         given: "an uuid"
         UUID expectedUuid = UUID.randomUUID()
 
-        and: "a repository that can't find the entity by id"
-        1 * mockTradeRepository.findById(expectedUuid) >> Optional.of(trade)
+        and: "a repository that finds a trade from different account"
+        1 * mockTradeRepository.findById(expectedUuid) >> Optional.of(
+                new Trade(
+                        uuid: UUID.randomUUID(),
+                        accountUuid: UUID.randomUUID()
+                )
+        )
 
         and: "a repository that finds another different account"
         1 * mockAccountRepository.findById(trade.accountUuid) >> Optional.of(new Account(

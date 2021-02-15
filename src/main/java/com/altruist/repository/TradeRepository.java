@@ -12,4 +12,5 @@ public interface TradeRepository {
     List<Trade> findByAccount(UUID accountUuid);
 
 
+    Optional<Trade> findByIdAndAccountId(UUID tradeUuid, UUID accountUuid);
 }

@@ -2,6 +2,7 @@ package com.altruist.resources
 
 import com.altruist.config.ApplicationConfiguration
 import com.altruist.exceptions.InvalidOperationException
+import com.altruist.exceptions.InvalidTradeStatusException
 import com.altruist.model.Trade
 import com.altruist.model.TradeSide
 import com.altruist.model.TradeStatus
@@ -67,7 +68,7 @@ class TradeControllerTest extends Specification {
         )
 
         then: "the request is processed"
-        1 * mockTradeService.create(_) >> { Trade arg ->
+        1 * mockTradeService.create(trade) >> { Trade arg ->
             with(arg){
                 accountUuid : trade.accountUuid
                 symbol: trade.symbol
@@ -204,11 +205,11 @@ class TradeControllerTest extends Specification {
 
         then: "The service method is called"
         1 * mockTradeService.cancelTrade(trade.accountUuid, trade.uuid) >> {
-            throw new InvalidOperationException();
+            throw new InvalidTradeStatusException();
         }
 
         and: "request status is conflict"
-        results.andExpect(status().isConflict())
+        results.andExpect(status().isUnavailableForLegalReasons())
     }
 
 

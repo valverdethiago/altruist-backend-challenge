@@ -3,6 +3,9 @@ package com.altruist.resources;
 import com.altruist.IdDto;
 import com.altruist.model.Address;
 import com.altruist.service.AddressService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +39,11 @@ public class AddressController {
     }
 
 
+    @Operation(summary = "Creates an address for the account with the uuid informed on the path")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Accounts list"),
+        @ApiResponse(responseCode = "204", description = "No accounts found"),
+    })
     @PostMapping(
         consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
@@ -50,6 +58,11 @@ public class AddressController {
             .body(new IdDto(uuid));
     }
 
+    @Operation(summary = "Updates an address for the account with the uuid informed on the path")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Accounts list"),
+        @ApiResponse(responseCode = "204", description = "No accounts found"),
+    })
     @PutMapping(
         consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
@@ -61,6 +74,12 @@ public class AddressController {
         return ResponseEntity.accepted().build();
     }
 
+    @Operation(summary = "Returns the address for the account with the uuid informed on the path")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Address information"),
+        @ApiResponse(responseCode = "204", description = "No address found for this account"),
+        @ApiResponse(responseCode = "404", description = "Account not found")
+    })
     @GetMapping(produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<Address> get(@PathVariable("accountId") UUID accountId) {
         log.info("Listing trades for account [{}].", accountId);
@@ -72,6 +91,13 @@ public class AddressController {
         return result.get();
     }
 
+
+    @Operation(summary = "Deletes the address for the account with the uuid informed on the path")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "202", description = "Address deleted"),
+        @ApiResponse(responseCode = "409", description = "No address found for this account"),
+        @ApiResponse(responseCode = "404", description = "Account not found")
+    })
     @DeleteMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void delete(@PathVariable("accountId") UUID accountId) {
