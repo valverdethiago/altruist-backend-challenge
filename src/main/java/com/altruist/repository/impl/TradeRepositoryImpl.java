@@ -5,6 +5,7 @@ import com.altruist.model.TradeSide;
 import com.altruist.model.TradeStatus;
 import com.altruist.repository.TradeRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
@@ -79,14 +80,20 @@ public class TradeRepositoryImpl implements TradeRepository {
     }
 
     @Override
-    public Trade findById(UUID uuid) {
-        return this.jdbcTemplate.queryForObject(
-            "select trade.*, " +
-                "trade.quantity * trade.price as total_amount " +
-                "from trade.trade as trade " +
-                "where trade_uuid = ? ",
-            new Object[] {uuid},
-            new TradeMapper());
+    public Optional<Trade> findById(UUID uuid) {
+        try {
+            return Optional.ofNullable(this.jdbcTemplate.queryForObject(
+                "select trade.*, " +
+                    "trade.quantity * trade.price as total_amount " +
+                    "from trade.trade as trade " +
+                    "where trade_uuid = ? ",
+                new Object[] {uuid},
+                new TradeMapper()));
+        }
+        catch (EmptyResultDataAccessException ex) {
+            log.warn("No trade found for id {}", uuid);
+            return Optional.empty();
+        }
     }
 
     @Override

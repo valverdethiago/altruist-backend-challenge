@@ -78,7 +78,7 @@ class AddressServiceTest extends Specification {
         service.create(expectedAccountId, address)
 
         then: "the account is fetched from the database"
-        1 * mockAccountRepository.findById(expectedAccountId) >> account
+        1 * mockAccountRepository.findById(expectedAccountId) >> Optional.of(account)
 
         and: "the address is saved"
         1 * mockAddressRepository.save(_) >> { Address arg ->
@@ -103,7 +103,7 @@ class AddressServiceTest extends Specification {
         UUID expectedAccountId = UUID.randomUUID()
 
         and: "the repository can't find the account"
-        1 * mockAccountRepository.findById(expectedAccountId) >> null
+        1 * mockAccountRepository.findById(expectedAccountId) >> Optional.empty()
 
         when:
         service.create(expectedAccountId, address)
@@ -152,10 +152,10 @@ class AddressServiceTest extends Specification {
         service.update(expectedAccountId, address)
 
         then: "the account is fetched from the database"
-        1 * mockAccountRepository.findById(expectedAccountId) >> account
+        1 * mockAccountRepository.findById(expectedAccountId) >> Optional.of(account)
 
         and: "the address is fetched from the database"
-        1 * mockAddressRepository.findByAccountId(expectedAccountId) >> address
+        1 * mockAddressRepository.findByAccountId(expectedAccountId) >> Optional.of(address)
 
         and: "the address is updated"
         1 * mockAddressRepository.update(address)
@@ -172,10 +172,10 @@ class AddressServiceTest extends Specification {
         address.uuid = UUID.randomUUID()
 
         and: "The repository can find the account "
-        1 * mockAccountRepository.findById(expectedAccountId) >> account
+        1 * mockAccountRepository.findById(expectedAccountId) >> Optional.of(account)
 
         and: "The repository can't find the address for the given account"
-        1 * mockAddressRepository.findByAccountId(expectedAccountId) >> null
+        1 * mockAddressRepository.findByAccountId(expectedAccountId) >> Optional.empty()
 
         when:
         service.update(expectedAccountId, address)

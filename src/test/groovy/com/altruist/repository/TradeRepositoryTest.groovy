@@ -65,7 +65,7 @@ class TradeRepositoryTest extends Specification {
         trade.status == TradeStatus.SUBMITTED
 
         and: "the inserted trade is found "
-        Trade insertedTrade = repository.findById(trade.uuid)
+        Trade insertedTrade = repository.findById(trade.uuid).get()
         insertedTrade
         insertedTrade.uuid == trade.uuid
         insertedTrade.quantity == trade.quantity
@@ -95,7 +95,7 @@ class TradeRepositoryTest extends Specification {
 
         when:
         repository.update(trade)
-        Trade upToDateTrade = repository.findById(trade.uuid)
+        Trade upToDateTrade = repository.findById(trade.uuid).get()
 
         then: "the trade is returned"
         upToDateTrade
@@ -139,5 +139,13 @@ class TradeRepositoryTest extends Specification {
 
         and: "the total amount is correct"
         dbTrades.each {item -> item.totalAmount == item.price * item.quantity }
+    }
+
+    def "A blank list should not cause an exception "() {
+        when:
+        Trade[] trades = repository.findByAccount(UUID.randomUUID());
+
+        then: "the list is empty"
+        trades.length == 0
     }
 }

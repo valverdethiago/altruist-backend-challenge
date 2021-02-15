@@ -46,21 +46,22 @@ public class AddressServiceImpl implements com.altruist.service.AddressService {
   @Override
   public void update(@NonNull UUID accountUuid, Address address) {
     assertAccountExists(accountUuid);
-    Address currentAddress = this.findByAccountUuid(accountUuid);
-    if(currentAddress == null) {
-      throw new InvalidOperationException("Address doesn't exist yet");
-    }
+    Address currentAddress = this.findByAccountUuid(accountUuid)
+        .orElseThrow(() -> new InvalidOperationException("Address doesn't exist yet"));
     address.setUuid(currentAddress.getUuid());
     this.update(address);
   }
 
   @Override
-  public Address findByAccountUuid(@NonNull UUID accountUuid) {
+  public Optional<Address> findByAccountUuid(@NonNull UUID accountUuid) {
     return addressRepository.findByAccountId(accountUuid);
   }
 
   @Override
   public void deleteAddressFromAccount(@NonNull UUID accountUuid) {
+    Account account = assertAccountExists(accountUuid);
+    account.setAddressUuid(null);
+    this.accountRepository.update(account);
     addressRepository.deleteAddressFromAccount(accountUuid);
   }
 
@@ -72,10 +73,8 @@ public class AddressServiceImpl implements com.altruist.service.AddressService {
   }
 
   private Account assertAccountExists(UUID accountUuid) {
-    Account account = this.accountRepository.findById(accountUuid);
-    if(account == null) {
-        throw new EntityNotFoundException(String.format("Invalid id for account [%s]", accountUuid));
-    }
-    return account;
+    Optional<Account> account = this.accountRepository.findById(accountUuid);
+    account.orElseThrow(() -> new EntityNotFoundException(String.format("Invalid id for account [%s]", accountUuid)));
+    return account.get();
   }
 }

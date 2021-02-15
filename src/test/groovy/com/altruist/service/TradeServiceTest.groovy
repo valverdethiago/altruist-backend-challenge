@@ -58,7 +58,7 @@ class TradeServiceTest extends Specification {
         UUID expectedUuid = UUID.randomUUID()
 
         and: "an account repository able to find the account for the trade"
-        1 * mockAccountRepository.findById(trade.accountUuid) >> account
+        1 * mockAccountRepository.findById(trade.accountUuid) >> Optional.of(account)
 
         when:
         trade = service.create(trade)
@@ -87,7 +87,7 @@ class TradeServiceTest extends Specification {
 
     def "Should not save trade for unknown account"() {
         given: "an account repository that can't to find the account for the trade"
-        1 * mockAccountRepository.findById(trade.accountUuid) >> null
+        1 * mockAccountRepository.findById(trade.accountUuid) >> Optional.empty()
 
         when:
         trade = service.create(trade)
@@ -106,10 +106,10 @@ class TradeServiceTest extends Specification {
         trade.status = TradeStatus.SUBMITTED
 
         and: "a repository that finds the trade by id"
-        1 * mockTradeRepository.findById(expectedUuid) >> trade
+        1 * mockTradeRepository.findById(expectedUuid) >> Optional.of(trade)
 
         and: "a repository that finds the account by id"
-        1 * mockAccountRepository.findById(account.uuid) >> account
+        1 * mockAccountRepository.findById(account.uuid) >> Optional.of(account)
 
         when:
         trade = service.cancelTrade(account.uuid, trade.uuid)
@@ -140,10 +140,10 @@ class TradeServiceTest extends Specification {
         trade.status = TradeStatus.COMPLETED
 
         and: "a repository that find the entity by id"
-        1 * mockTradeRepository.findById(expectedUuid) >> trade
+        1 * mockTradeRepository.findById(expectedUuid) >> Optional.of(trade)
 
         and: "a repository that finds the account by id"
-        1 * mockAccountRepository.findById(account.uuid) >> account
+        1 * mockAccountRepository.findById(account.uuid) >> Optional.of(account)
 
         when:
         trade = service.cancelTrade(account.uuid, trade.uuid)
@@ -157,10 +157,10 @@ class TradeServiceTest extends Specification {
         UUID expectedUuid = UUID.randomUUID()
 
         and: "a repository that can't find the entity by id"
-        1 * mockTradeRepository.findById(expectedUuid) >> null
+        1 * mockTradeRepository.findById(expectedUuid) >> Optional.empty()
 
         and: "a repository that finds the account by id"
-        1 * mockAccountRepository.findById(account.uuid) >> account
+        1 * mockAccountRepository.findById(account.uuid) >> Optional.of(account)
 
         when:
         trade = service.cancelTrade(account.uuid, expectedUuid)
@@ -174,14 +174,14 @@ class TradeServiceTest extends Specification {
         UUID expectedUuid = UUID.randomUUID()
 
         and: "a repository that can't find the entity by id"
-        1 * mockTradeRepository.findById(expectedUuid) >> trade
+        1 * mockTradeRepository.findById(expectedUuid) >> Optional.of(trade)
 
         and: "a repository that finds another different account"
-        1 * mockAccountRepository.findById(trade.accountUuid) >> new Account(
+        1 * mockAccountRepository.findById(trade.accountUuid) >> Optional.of(new Account(
                 uuid: UUID.randomUUID(),
                 username: "anotherusername",
                 email: "anothermail@email.com"
-        )
+        ))
 
         when:
         trade = service.cancelTrade(trade.accountUuid, expectedUuid)

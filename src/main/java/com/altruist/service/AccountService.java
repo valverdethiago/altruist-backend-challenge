@@ -9,7 +9,7 @@ public interface AccountService {
 
     void update(Account account);
 
-    Account findById(UUID accountUuid);
+    Optional<Account> findById(UUID accountUuid);
 
     List<Account> listAll();
 }

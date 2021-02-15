@@ -14,7 +14,7 @@ public interface AddressService {
 
     void update(@NonNull UUID accountUuid, Address address);
 
-    Address findByAccountUuid(@NonNull UUID accountUuid);
+    Optional<Address> findByAccountUuid(@NonNull UUID accountUuid);
 
     void deleteAddressFromAccount(@NonNull UUID accountUuid);
 }
