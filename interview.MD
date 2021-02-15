@@ -33,6 +33,15 @@ which violates the SRP (Single Responsibility Principle) and also let our classe
 related to each entity to a separate repository and service.
    
 3. Enums: I also added some enums to automatically restrict the values accepted for some fields such State, TradeState and TradeSide.
+
+4. Rest endpoints: 
+   a. Sorry to make assumptions on the sample you provided me, but I think it'd be a great exercise to make this API
+a bit more compliant to the Rest standards. So, I deducted that one account can only have one address and one address can be attached 
+to only an account. So, I created  a separate controller to accommodate all the logic for this resource, which is a sub-resource of
+accounts (/accounts/{accountUuid}/address).
+   b. I also created all the endpoints to make this project a bit more closer to *production ready*.
+   c. Please find the swagger-ui where you can play a bit with all the endpoints without needing to configure a rest client for it.  
+      It's available on the [application root context](http://localhost:8080).
    
 ## Table Design
 
