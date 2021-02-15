@@ -5,6 +5,9 @@ import com.altruist.model.Account;
 import com.altruist.model.Trade;
 import com.altruist.service.TradeService;
 import com.altruist.utils.HttpUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +40,11 @@ public class TradeController {
     }
 
 
+    @Operation(summary = "Creates a trade on the account with the uuid informed on the path")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Trade UUID"),
+        @ApiResponse(responseCode = "404", description = "Account Not found"),
+    })
     @PostMapping(
         consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
@@ -51,6 +59,12 @@ public class TradeController {
             .body(new IdDto(dbTrade.getUuid()));
     }
 
+    @Operation(summary = "List all trades for the account with the UUID specified on path")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Trade list"),
+        @ApiResponse(responseCode = "204", description = "No trades on the account"),
+        @ApiResponse(responseCode = "404", description = "Account Not found")
+    })
     @GetMapping(produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Trade>> list(@PathVariable("accountUuid") UUID accountUuid) {
         log.info("Listing trades for account [{}].", accountUuid);
@@ -62,7 +76,12 @@ public class TradeController {
             .body(trades);
     }
 
-
+    @Operation(summary = "Returns the trade with the UUID specified on the path on " +
+        "the account with the UUID specified on the path")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Trade Information"),
+        @ApiResponse(responseCode = "404", description = "Trade not found on the account")
+    })
     @GetMapping(produces = APPLICATION_JSON_VALUE, value = "/{tradeUuid}")
     public ResponseEntity<Trade> get(@PathVariable("accountUuid") UUID accountUuid,
                                        @PathVariable("tradeUuid") UUID tradeUuid) {
@@ -75,6 +94,13 @@ public class TradeController {
         return result.get();
     }
 
+    @Operation(summary = "Try to cancel a trade with the UUID specified on the path on " +
+        "the account with the UUID specified on the path")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "202", description = "Trade cancelled"),
+        @ApiResponse(responseCode = "409", description = "The trade you are trying to cancel doesn't belong to the account"),
+        @ApiResponse(responseCode = "451", description = "The trade you are trying to cancel ois not un SUBMITTED status")
+    })
     @DeleteMapping(value = "/{tradeUuid}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void cancel(@PathVariable("accountUuid") UUID accountId,
