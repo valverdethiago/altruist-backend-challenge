@@ -2,6 +2,7 @@ package com.altruist.service.impl;
 
 import com.altruist.exceptions.EntityNotFoundException;
 import com.altruist.exceptions.InvalidOperationException;
+import com.altruist.exceptions.InvalidTradeStatusException;
 import com.altruist.model.Account;
 import com.altruist.model.Trade;
 import com.altruist.model.TradeStatus;
@@ -44,7 +45,7 @@ public class TradeServiceImpl implements TradeService {
         this.assertAccountExists(accountUuid);
         Trade trade = assertThatTradeExistsAndBelongsToAccount(accountUuid, tradeUuid);
         if (trade.getStatus() != TradeStatus.SUBMITTED) {
-            throw new InvalidOperationException(
+            throw new InvalidTradeStatusException(
                 String.format("It's not allowed to cancel trades that are not on %s state", TradeStatus.SUBMITTED)
             );
         }
