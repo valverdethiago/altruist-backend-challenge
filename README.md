@@ -45,3 +45,5 @@ We'll be looking at the following criteria when assessing candidate submissions:
 - Git history, including comments in the PR
 
 **Good luck!**
+
+Thanks. Please take some time to check a few notes I wrote about this exercise [here](./interview.MD)
