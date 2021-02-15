@@ -69,8 +69,6 @@ dependencies {
     implementation("org.flywaydb:flyway-core")
     implementation("com.opentable.components:otj-pg-embedded:0.13.0")
 
-    //implementation("io.springfox:springfox-swagger2:2.9.2")
-    //implementation("io.springfox:springfox-boot-starter:3.0.0")
     implementation("org.springdoc:springdoc-openapi-ui:1.5.2")
 
     compileOnly("org.projectlombok:lombok")
