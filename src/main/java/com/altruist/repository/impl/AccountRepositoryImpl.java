@@ -1,12 +1,9 @@
 package com.altruist.repository.impl;
 
 import com.altruist.model.Account;
-import com.altruist.model.Trade;
-import com.altruist.model.TradeSide;
-import com.altruist.model.TradeStatus;
 import com.altruist.repository.AccountRepository;
-import com.altruist.repository.impl.TradeRepositoryImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
@@ -17,7 +14,6 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.*;
 
 @Repository
@@ -58,7 +54,8 @@ public class AccountRepositoryImpl implements AccountRepository {
     log.info("Updating account [{}].", account);
     String sql = "UPDATE trade.account SET " +
         "  username = :username, " +
-        "  email = :email " +
+        "  email = :email ," +
+        "  address_uuid = :addressUuid " +
         " WHERE account_uuid = :uuid ";
     try {
       jdbcOperations.update(sql, params);
@@ -71,13 +68,19 @@ public class AccountRepositoryImpl implements AccountRepository {
   }
 
   @Override
-  public Account findById(UUID accountUuId) {
-    return this.jdbcTemplate.queryForObject(
-        "select * " +
-            "from trade.account " +
-            "where account_uuid = ? ",
-        new Object[] {accountUuId},
-        new AccountMapper());
+  public Optional<Account> findById(UUID accountUuId) {
+    try {
+      return Optional.ofNullable(this.jdbcTemplate.queryForObject(
+          "select * " +
+              "from trade.account " +
+              "where account_uuid = ? ",
+          new Object[] {accountUuId},
+          new AccountMapper()));
+    }
+    catch (EmptyResultDataAccessException ex) {
+      log.warn("No account found with id {}", accountUuId);
+      return Optional.empty();
+    }
   }
 
   @Override

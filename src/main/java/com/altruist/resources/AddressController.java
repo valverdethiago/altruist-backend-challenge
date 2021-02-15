@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.net.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -63,12 +64,12 @@ public class AddressController {
     @GetMapping(produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<Address> get(@PathVariable("accountId") UUID accountId) {
         log.info("Listing trades for account [{}].", accountId);
-        Address address = addressService.findByAccountUuid(accountId);
-        if(address == null) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok()
-            .body(address);
+        AtomicReference<ResponseEntity<Address>> result = new AtomicReference<>();
+        addressService.findByAccountUuid(accountId).ifPresentOrElse(
+            (value) -> result.set(ResponseEntity.ok().body(value)),
+            () -> result.set(ResponseEntity.noContent().build())
+        );
+        return result.get();
     }
 
     @DeleteMapping

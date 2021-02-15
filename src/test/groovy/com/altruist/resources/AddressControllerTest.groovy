@@ -109,7 +109,7 @@ class AddressControllerTest extends Specification {
         )
 
         then: "the list method on server is called"
-        1 * mockAddressService.findByAccountUuid(accountId) >> address
+        1 * mockAddressService.findByAccountUuid(accountId) >> Optional.of(address)
 
         and: "request status is ok"
         results.andExpect(status().isOk())
@@ -128,7 +128,7 @@ class AddressControllerTest extends Specification {
         UUID accountId = UUID.randomUUID()
 
         and: "A service can't find the address for the account"
-        1 * mockAddressService.findByAccountUuid(accountId) >> null
+        1 * mockAddressService.findByAccountUuid(accountId) >> Optional.empty()
 
         when: "the request is submitted"
         ResultActions results = mvc.perform(

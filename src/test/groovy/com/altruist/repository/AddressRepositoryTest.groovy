@@ -2,6 +2,7 @@ package com.altruist.repository
 
 import com.altruist.config.DatabaseConfiguration
 import com.altruist.config.RepositoryConfiguration
+import com.altruist.model.Account
 import com.altruist.model.Address
 import com.altruist.model.State
 import com.altruist.repository.impl.AddressRepositoryImpl
@@ -64,7 +65,7 @@ class AddressRepositoryTest extends Specification {
 
         when:
         repository.update(address)
-        Address upToDateAddress = repository.findById(address.uuid)
+        Address upToDateAddress = repository.findById(address.uuid).get()
 
         then: "the trade is returned"
         upToDateAddress

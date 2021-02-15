@@ -9,9 +9,9 @@ public interface AddressRepository {
 
     void update(Address address);
 
-    Address findById(UUID addressUuId);
+    Optional<Address> findById(UUID addressUuId);
 
-    Address findByAccountId(UUID accountUuid);
+    Optional<Address> findByAccountId(UUID accountUuid);
 
     void deleteAddressFromAccount(UUID accountUuid);
 }

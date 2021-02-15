@@ -70,10 +70,10 @@ class AccountServiceTest extends Specification {
         account.uuid = UUID.randomUUID()
 
         when: "The service method is called"
-        Account dbAccount = service.findById(account.uuid)
+        Account dbAccount = service.findById(account.uuid).get()
 
         then: "The repository method is called"
-        1 * mockAccountRepository.findById(account.uuid) >> account
+        1 * mockAccountRepository.findById(account.uuid) >> Optional.of(account)
 
         and: "Account data is equal"
         account.uuid == dbAccount.uuid
@@ -143,7 +143,7 @@ class AccountServiceTest extends Specification {
         service.update(account)
 
         then: "The findByAccountUuid method should be called on address service"
-        1 * mockAddressService.findByAccountUuid(account.uuid) >> account.address
+        1 * mockAddressService.findByAccountUuid(account.uuid) >> Optional.of(account.address)
 
         and: "the update method on address service is called"
         1 * mockAddressService.update(account.address)

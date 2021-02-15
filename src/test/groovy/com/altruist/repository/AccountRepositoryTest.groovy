@@ -81,7 +81,7 @@ class AccountRepositoryTest extends Specification {
 
         when:
         repo.update(account)
-        Account upToDateAccount = repo.findById(account.uuid)
+        Account upToDateAccount = repo.findById(account.uuid).get()
 
         then: "the account is returned"
         upToDateAccount
@@ -90,5 +90,13 @@ class AccountRepositoryTest extends Specification {
         upToDateAccount.username == account.username
         upToDateAccount.email == account.email
 
+    }
+
+    def "A blank list should not cause an exception "() {
+        when:
+        Account[] accounts = repo.listAll()
+
+        then: "the list is empty"
+        accounts.length == 0
     }
 }

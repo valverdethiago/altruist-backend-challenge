@@ -2,7 +2,6 @@ package com.altruist.service.impl;
 
 import com.altruist.exceptions.InvalidOperationException;
 import com.altruist.model.Account;
-import com.altruist.model.Address;
 import com.altruist.repository.AccountRepository;
 import com.altruist.service.AccountService;
 import com.altruist.service.AddressService;
@@ -42,7 +41,7 @@ public class AccountServiceImpl implements AccountService {
   }
 
   @Override
-  public Account findById(UUID accountUuid) {
+  public Optional<Account> findById(UUID accountUuid) {
     return accountRepository.findById(accountUuid);
   }
 
@@ -52,9 +51,16 @@ public class AccountServiceImpl implements AccountService {
   }
 
   private void persistAddressFromAccount(Account account) {
-    Address address = this.addressService.findByAccountUuid(account.getUuid());
-    account.getAddress().setUuid(address.getUuid());
-    this.addressService.update(address);
+    this.addressService.findByAccountUuid(account.getUuid())
+        .ifPresentOrElse(
+            (address)-> {
+              account.getAddress().setUuid(address.getUuid());
+              this.addressService.update(address);
+            },
+            () -> {
+              throw new InvalidOperationException("There's no address for this account "+account.getUuid());
+            }
+        );
   }
 
   private void assertUuidIsInformed(Account account) {

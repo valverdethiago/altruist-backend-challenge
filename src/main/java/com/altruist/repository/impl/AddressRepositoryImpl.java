@@ -5,6 +5,7 @@ import com.altruist.model.Address;
 import com.altruist.model.State;
 import com.altruist.repository.AddressRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
@@ -75,25 +76,36 @@ public class AddressRepositoryImpl implements AddressRepository {
   }
 
   @Override
-  public Address findById(UUID addressUuId) {
-    return this.jdbcTemplate.queryForObject(
-        "select * " +
-            "from trade.address " +
-            "where address_uuid = ? ",
-        new Object[] {addressUuId},
-        new AddressMapper());
+  public Optional<Address> findById(UUID addressUuId) {
+    try {
+      return Optional.ofNullable(this.jdbcTemplate.queryForObject(
+          "select * " +
+              "from trade.address " +
+              "where address_uuid = ? ",
+          new Object[] {addressUuId},
+          new AddressMapper()));
+    } catch (EmptyResultDataAccessException ex) {
+      log.warn("No address found with id {}", addressUuId);
+      return Optional.empty();
+    }
   }
 
   @Override
-  public Address findByAccountId(UUID accountUuid) {
-    return this.jdbcTemplate.queryForObject(
-    "select address.* " +
-        "from trade.account as account " +
-        "join trade.address as address" +
-        "  on account.address_uuid = address.address_uuid " +
-        "where account_uuid = ? ",
-        new Object[] {accountUuid},
-        new AddressMapper());
+  public Optional<Address> findByAccountId(UUID accountUuid) {
+    try {
+      return Optional.ofNullable(this.jdbcTemplate.queryForObject(
+          "select address.* " +
+              "from trade.account as account " +
+              "join trade.address as address" +
+              "  on account.address_uuid = address.address_uuid " +
+              "where account_uuid = ? ",
+          new Object[] {accountUuid},
+          new AddressMapper()));
+    }
+    catch (EmptyResultDataAccessException e) {
+      log.warn("No address found for account {}", accountUuid);
+      return Optional.empty();
+    }
   }
 
   @Override
