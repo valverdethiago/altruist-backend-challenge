@@ -80,6 +80,9 @@ class AddressServiceTest extends Specification {
         then: "the account is fetched from the database"
         1 * mockAccountRepository.findById(expectedAccountId) >> Optional.of(account)
 
+        and: "the address doesn't exist for this account"
+        1 * mockAddressRepository.findByAccountId(expectedAccountId) >> Optional.empty()
+
         and: "the address is saved"
         1 * mockAddressRepository.save(_) >> { Address arg ->
             with(arg) {

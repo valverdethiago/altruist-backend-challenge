@@ -29,7 +29,7 @@ public class AddressServiceImpl implements com.altruist.service.AddressService {
 
   @Override
   public UUID create(@NonNull UUID accountUuid, Address address) {
-    Account account = assertAccountExists(accountUuid);
+    Account account = Account.builder().uuid(accountUuid).build();
     return this.create(account, address);
   }
 
@@ -46,35 +46,52 @@ public class AddressServiceImpl implements com.altruist.service.AddressService {
   @Override
   public void update(@NonNull UUID accountUuid, Address address) {
     assertAccountExists(accountUuid);
-    Address currentAddress = this.findByAccountUuid(accountUuid)
-        .orElseThrow(() -> new InvalidOperationException("Address doesn't exist yet"));
+    Address currentAddress = assertAddressExists(accountUuid);
     address.setUuid(currentAddress.getUuid());
     this.update(address);
   }
 
   @Override
   public Optional<Address> findByAccountUuid(@NonNull UUID accountUuid) {
+    assertAccountExists(accountUuid);
     return addressRepository.findByAccountId(accountUuid);
   }
 
   @Override
   public void deleteAddressFromAccount(@NonNull UUID accountUuid) {
     Account account = assertAccountExists(accountUuid);
+    this.assertAddressExists(accountUuid);
     account.setAddressUuid(null);
     this.accountRepository.update(account);
     addressRepository.deleteAddressFromAccount(accountUuid);
   }
 
   private UUID create(@NonNull Account account, Address address) {
+    Account dbAccount = assertAccountExists(account.getUuid());
+    assertThatAddressDoesNotExists(dbAccount);
     UUID uuid = addressRepository.save(address).getUuid();
     account.setAddressUuid(uuid);
     this.accountRepository.update(account);
     return uuid;
   }
 
-  private Account assertAccountExists(UUID accountUuid) {
+  private void assertThatAddressDoesNotExists(Account account) {
+    this.findByAccountUuid(account.getUuid())
+        .ifPresent(item -> {
+          throw new InvalidOperationException(
+              String.format("Address already exists for this account %s", account.getUuid())
+          );
+        });
+  }
+
+  private Account assertAccountExists(@NonNull UUID accountUuid) {
     Optional<Account> account = this.accountRepository.findById(accountUuid);
     account.orElseThrow(() -> new EntityNotFoundException(String.format("Invalid id for account [%s]", accountUuid)));
     return account.get();
+  }
+
+  private Address assertAddressExists(UUID accountUuid) {
+    return this.findByAccountUuid(accountUuid)
+        .orElseThrow(() -> new InvalidOperationException("Address doesn't exist yet"));
   }
 }
